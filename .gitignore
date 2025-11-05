@@ -1,0 +1,26 @@
+# Build outputs
+build/
+*.o
+*.a
+*.wasm
+*.js
+*.html
+*.data
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+.claude
+
+# Symlinks (user must create these)
+raylib
+
+# Don't ignore shell.html if we create a custom one
+!shell.html

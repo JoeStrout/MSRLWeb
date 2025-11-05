@@ -103,7 +103,7 @@ Then open http://localhost:8000/msrlweb.html in your browser.
 
 The application is **MiniScript-driven**, meaning your game/app logic is written in MiniScript:
 
-1. Initializes a Raylib window (800x600)
+1. Initializes a Raylib window (960x640)
 2. Creates a MiniScript interpreter with Raylib intrinsics
 3. Shows a loading screen while fetching `assets/main.ms`
 4. Loads and runs your MiniScript code from `assets/main.ms`
@@ -140,19 +140,31 @@ Currently exposed in the `raylib` module:
 
 Colors are maps with `r`, `g`, `b`, `a` components (0-255).
 
+Many more RayLib functions will be coming soon!
+
 ## Example MiniScript Code
 
 ```miniscript
 // assets/main.ms
-print "Hello from MiniScript!"
+print "main.ms running"  // (appears in the console output)
 
-// Use Raylib to draw
-raylib.BeginDrawing
-raylib.ClearBackground raylib.RAYWHITE
-raylib.DrawRectangle 100, 100, 200, 150, raylib.BLUE
-raylib.EndDrawing
+x = 100; y = 100
+dx = 10; dy = 10
 
-print "Drew a blue rectangle!"
+while true
+	raylib.BeginDrawing
+	
+	raylib.ClearBackground raylib.BLACK
+	raylib.DrawRectangle x, y, 200, 150, raylib.BLUE
+	x += dx; y += dy
+	if x + 200 > 960 and dx > 0 then dx = -dx
+	if x < 0 and dx < 0 then dx = -dx
+	if y + 150 > 640 and dy > 0 then dy = -dy
+	if y < 0 and dy < 0 then dy = -dy
+	
+	raylib.EndDrawing
+	yield
+end while
 ```
 
 ## Build Configuration

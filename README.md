@@ -2,6 +2,10 @@
 
 A web-based demonstration combining [MiniScript](https://miniscript.org) scripting with [Raylib](https://www.raylib.com/) graphics, compiled to WebAssembly using Emscripten.
 
+## Try it now!
+
+Go see the online demo at [https://joestrout.github.io/MSRLWeb/](https://joestrout.github.io/MSRLWeb/).
+
 ## Prerequisites
 
 1. **MiniScript-cpp**: C++ implementation of MiniScript

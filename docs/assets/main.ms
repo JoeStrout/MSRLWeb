@@ -1,7 +1,8 @@
 // main.ms
 // Simple test script for MSRLWeb
 
-print "main.ms running"
+print "main.ms running!"
+print "Move with arrow keys, or click with the mouse."
 
 x = 100; y = 100
 dx = 10; dy = 10

@@ -2,16 +2,37 @@
 
 # Simple script to run the web server and open the browser
 
+# Function to cleanup on exit
+cleanup() {
+    echo ""
+    echo "Stopping server..."
+    kill $SERVER_PID 2>/dev/null
+    exit 0
+}
+
+# Trap Ctrl+C and call cleanup
+trap cleanup INT TERM
+
 echo "Starting web server on http://localhost:8000"
-echo "Opening game.html in your browser..."
 echo ""
-echo "Press Ctrl+C to stop the server"
-echo ""
+
+# Start the web server in the background
+cd build
+python3 -m http.server 8000 &
+SERVER_PID=$!
+
+# Wait a moment for the server to start
+echo "Waiting for server to start..."
+sleep 1.5
 
 # Open in default browser (macOS)
+echo "Opening msrlweb.html in your browser..."
 open http://localhost:8000/msrlweb.html
 
-# Start the web server in the build folder
-cd build
-python3 -m http.server 8000
+echo ""
+echo "Server running. Press Ctrl+C to stop"
+echo ""
+
+# Wait for the server process
+wait $SERVER_PID
 

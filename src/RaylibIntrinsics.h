@@ -9,7 +9,7 @@
 #define RAYLIBINTRINSICS_H
 
 namespace MiniScript {
-    class Interpreter;
+	class Interpreter;
 }
 
 // Add Raylib intrinsics to the given MiniScript interpreter

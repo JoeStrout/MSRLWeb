@@ -77,6 +77,17 @@ static ValueDict TextureClass() {
 	return map;
 }
 
+static ValueDict FontClass() {
+	static ValueDict map;
+	if (map.Count() == 0) {
+		map.SetValue(String("_handle"), Value::zero);
+		map.SetValue(String("baseSize"), Value::zero);
+		map.SetValue(String("glyphCount"), Value::zero);
+		map.SetValue(String("glyphPadding"), Value::zero);
+	}
+	return map;
+}
+
 //--------------------------------------------------------------------------------
 // Helper functions
 //--------------------------------------------------------------------------------
@@ -140,6 +151,37 @@ static Image ValueToImage(Value value) {
 		return Image{nullptr, 0, 0, 0, 0};
 	}
 	return *imgPtr;
+}
+
+// Convert a Raylib Font to a MiniScript map
+static Value FontToValue(Font font) {
+	Font* fontPtr = new Font(font);
+	ValueDict map;
+	map.SetValue(Value::magicIsA, FontClass());
+	map.SetValue(String("_handle"), Value((long)fontPtr));
+	map.SetValue(String("baseSize"), Value(font.baseSize));
+	map.SetValue(String("glyphCount"), Value(font.glyphCount));
+	map.SetValue(String("glyphPadding"), Value(font.glyphPadding));
+	return Value(map);
+}
+
+// Extract a Raylib Font from a MiniScript map
+static Font ValueToFont(Value value) {
+	if (value.type != ValueType::Map) {
+		// Return default font if not a map
+		return GetFontDefault();
+	}
+	ValueDict map = value.GetDict();
+	Value handleVal = map.Lookup(String("_handle"), Value::zero);
+	if (handleVal.IntValue() == 0) {
+		// If no handle, return default font
+		return GetFontDefault();
+	}
+	Font* fontPtr = (Font*)(long)handleVal.IntValue();
+	if (fontPtr == nullptr) {
+		return GetFontDefault();
+	}
+	return *fontPtr;
 }
 
 // Convert a MiniScript map to a Raylib Color
@@ -324,11 +366,11 @@ static void AddRTexturesMethods(ValueDict raylibModule) {
 	// Image generation
 
 	i = Intrinsic::Create("");
-	i->AddParam("width");
-	i->AddParam("height");
-	i->AddParam("direction");
-	i->AddParam("start");
-	i->AddParam("end");
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("direction", Value::zero);
+	i->AddParam("start", ColorToValue(BLACK));
+	i->AddParam("end", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		int width = context->GetVar(String("width")).IntValue();
 		int height = context->GetVar(String("height")).IntValue();
@@ -463,9 +505,9 @@ static void AddRTexturesMethods(ValueDict raylibModule) {
 
 	i = Intrinsic::Create("");
 	i->AddParam("texture");
-	i->AddParam("posX");
-	i->AddParam("posY");
-	i->AddParam("tint");
+	i->AddParam("posX", Value::zero);
+	i->AddParam("posY", Value::zero);
+	i->AddParam("tint", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Texture tex = ValueToTexture(context->GetVar(String("texture")));
 		int posX = context->GetVar(String("posX")).IntValue();
@@ -475,6 +517,821 @@ static void AddRTexturesMethods(ValueDict raylibModule) {
 		return IntrinsicResult::Null;
 	};
 	raylibModule.SetValue("DrawTexture", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("texture");
+	i->AddParam("position", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("tint", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Texture tex = ValueToTexture(context->GetVar(String("texture")));
+		Vector2 position = ValueToVector2(context->GetVar(String("position")));
+		Color tint = ValueToColor(context->GetVar(String("tint")));
+		DrawTextureV(tex, position, tint);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("DrawTextureV", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("texture");
+	i->AddParam("position", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("rotation", Value::zero);
+	i->AddParam("scale", Value(1.0));
+	i->AddParam("tint", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Texture tex = ValueToTexture(context->GetVar(String("texture")));
+		Vector2 position = ValueToVector2(context->GetVar(String("position")));
+		float rotation = context->GetVar(String("rotation")).FloatValue();
+		float scale = context->GetVar(String("scale")).FloatValue();
+		Color tint = ValueToColor(context->GetVar(String("tint")));
+		DrawTextureEx(tex, position, rotation, scale, tint);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("DrawTextureEx", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("texture");
+	i->AddParam("source");
+	i->AddParam("position", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("tint", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Texture tex = ValueToTexture(context->GetVar(String("texture")));
+		Rectangle source = ValueToRectangle(context->GetVar(String("source")));
+		Vector2 position = ValueToVector2(context->GetVar(String("position")));
+		Color tint = ValueToColor(context->GetVar(String("tint")));
+		DrawTextureRec(tex, source, position, tint);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("DrawTextureRec", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("texture");
+	i->AddParam("source");
+	i->AddParam("dest");
+	i->AddParam("origin", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("rotation", Value::zero);
+	i->AddParam("tint", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Texture tex = ValueToTexture(context->GetVar(String("texture")));
+		Rectangle source = ValueToRectangle(context->GetVar(String("source")));
+		Rectangle dest = ValueToRectangle(context->GetVar(String("dest")));
+		Vector2 origin = ValueToVector2(context->GetVar(String("origin")));
+		float rotation = context->GetVar(String("rotation")).FloatValue();
+		Color tint = ValueToColor(context->GetVar(String("tint")));
+		DrawTexturePro(tex, source, dest, origin, rotation, tint);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("DrawTexturePro", i->GetFunc());
+
+	// More image generation functions
+
+	i = Intrinsic::Create("");
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		int width = context->GetVar(String("width")).IntValue();
+		int height = context->GetVar(String("height")).IntValue();
+		Color color = ValueToColor(context->GetVar(String("color")));
+		Image img = GenImageColor(width, height, color);
+		return IntrinsicResult(ImageToValue(img));
+	};
+	raylibModule.SetValue("GenImageColor", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("density", Value(0.5));
+	i->AddParam("inner", ColorToValue(WHITE));
+	i->AddParam("outer", ColorToValue(BLACK));
+	i->code = INTRINSIC_LAMBDA {
+		int width = context->GetVar(String("width")).IntValue();
+		int height = context->GetVar(String("height")).IntValue();
+		float density = context->GetVar(String("density")).FloatValue();
+		Color inner = ValueToColor(context->GetVar(String("inner")));
+		Color outer = ValueToColor(context->GetVar(String("outer")));
+		Image img = GenImageGradientRadial(width, height, density, inner, outer);
+		return IntrinsicResult(ImageToValue(img));
+	};
+	raylibModule.SetValue("GenImageGradientRadial", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("density", Value(0.5));
+	i->AddParam("inner", ColorToValue(WHITE));
+	i->AddParam("outer", ColorToValue(BLACK));
+	i->code = INTRINSIC_LAMBDA {
+		int width = context->GetVar(String("width")).IntValue();
+		int height = context->GetVar(String("height")).IntValue();
+		float density = context->GetVar(String("density")).FloatValue();
+		Color inner = ValueToColor(context->GetVar(String("inner")));
+		Color outer = ValueToColor(context->GetVar(String("outer")));
+		Image img = GenImageGradientSquare(width, height, density, inner, outer);
+		return IntrinsicResult(ImageToValue(img));
+	};
+	raylibModule.SetValue("GenImageGradientSquare", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("checksX", Value(8));
+	i->AddParam("checksY", Value(8));
+	i->AddParam("col1", ColorToValue(WHITE));
+	i->AddParam("col2", ColorToValue(BLACK));
+	i->code = INTRINSIC_LAMBDA {
+		int width = context->GetVar(String("width")).IntValue();
+		int height = context->GetVar(String("height")).IntValue();
+		int checksX = context->GetVar(String("checksX")).IntValue();
+		int checksY = context->GetVar(String("checksY")).IntValue();
+		Color col1 = ValueToColor(context->GetVar(String("col1")));
+		Color col2 = ValueToColor(context->GetVar(String("col2")));
+		Image img = GenImageChecked(width, height, checksX, checksY, col1, col2);
+		return IntrinsicResult(ImageToValue(img));
+	};
+	raylibModule.SetValue("GenImageChecked", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("factor", Value(0.5));
+	i->code = INTRINSIC_LAMBDA {
+		int width = context->GetVar(String("width")).IntValue();
+		int height = context->GetVar(String("height")).IntValue();
+		float factor = context->GetVar(String("factor")).FloatValue();
+		Image img = GenImageWhiteNoise(width, height, factor);
+		return IntrinsicResult(ImageToValue(img));
+	};
+	raylibModule.SetValue("GenImageWhiteNoise", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("tileSize", Value(32));
+	i->code = INTRINSIC_LAMBDA {
+		int width = context->GetVar(String("width")).IntValue();
+		int height = context->GetVar(String("height")).IntValue();
+		int tileSize = context->GetVar(String("tileSize")).IntValue();
+		Image img = GenImageCellular(width, height, tileSize);
+		return IntrinsicResult(ImageToValue(img));
+	};
+	raylibModule.SetValue("GenImageCellular", i->GetFunc());
+
+	// Image manipulation
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		Image copy = ImageCopy(img);
+		return IntrinsicResult(ImageToValue(copy));
+	};
+	raylibModule.SetValue("ImageCopy", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->AddParam("crop");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		Rectangle crop = ValueToRectangle(context->GetVar(String("crop")));
+		ImageCrop(&img, crop);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageCrop", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->AddParam("newWidth");
+	i->AddParam("newHeight");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		int newWidth = context->GetVar(String("newWidth")).IntValue();
+		int newHeight = context->GetVar(String("newHeight")).IntValue();
+		ImageResize(&img, newWidth, newHeight);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageResize", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->AddParam("newWidth");
+	i->AddParam("newHeight");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		int newWidth = context->GetVar(String("newWidth")).IntValue();
+		int newHeight = context->GetVar(String("newHeight")).IntValue();
+		ImageResizeNN(&img, newWidth, newHeight);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageResizeNN", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		ImageFlipVertical(&img);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageFlipVertical", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		ImageFlipHorizontal(&img);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageFlipHorizontal", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		ImageRotateCW(&img);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageRotateCW", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		ImageRotateCCW(&img);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageRotateCCW", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageColorTint(&img, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageColorTint", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		ImageColorInvert(&img);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageColorInvert", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		ImageColorGrayscale(&img);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageColorGrayscale", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->AddParam("contrast");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		float contrast = context->GetVar(String("contrast")).FloatValue();
+		ImageColorContrast(&img, contrast);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageColorContrast", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->AddParam("brightness");
+	i->code = INTRINSIC_LAMBDA {
+		Image img = ValueToImage(context->GetVar(String("image")));
+		int brightness = context->GetVar(String("brightness")).IntValue();
+		ImageColorBrightness(&img, brightness);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageColorBrightness", i->GetFunc());
+
+	// Image drawing functions
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageClearBackground(&dst, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageClearBackground", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("x", Value::zero);
+	i->AddParam("y", Value::zero);
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		int x = context->GetVar(String("x")).IntValue();
+		int y = context->GetVar(String("y")).IntValue();
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageDrawPixel(&dst, x, y, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDrawPixel", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("position", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		Vector2 position = ValueToVector2(context->GetVar(String("position")));
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageDrawPixelV(&dst, position, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDrawPixelV", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("startPosX", Value::zero);
+	i->AddParam("startPosY", Value::zero);
+	i->AddParam("endPosX", Value::zero);
+	i->AddParam("endPosY", Value::zero);
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		int startPosX = context->GetVar(String("startPosX")).IntValue();
+		int startPosY = context->GetVar(String("startPosY")).IntValue();
+		int endPosX = context->GetVar(String("endPosX")).IntValue();
+		int endPosY = context->GetVar(String("endPosY")).IntValue();
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageDrawLine(&dst, startPosX, startPosY, endPosX, endPosY, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDrawLine", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("start", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("end", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		Vector2 start = ValueToVector2(context->GetVar(String("start")));
+		Vector2 end = ValueToVector2(context->GetVar(String("end")));
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageDrawLineV(&dst, start, end, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDrawLineV", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("centerX", Value(100));
+	i->AddParam("centerY", Value(100));
+	i->AddParam("radius", Value(32));
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		int centerX = context->GetVar(String("centerX")).IntValue();
+		int centerY = context->GetVar(String("centerY")).IntValue();
+		int radius = context->GetVar(String("radius")).IntValue();
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageDrawCircle(&dst, centerX, centerY, radius, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDrawCircle", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("center", Vector2ToValue(Vector2{100, 100}));
+	i->AddParam("radius", Value(32));
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		Vector2 center = ValueToVector2(context->GetVar(String("center")));
+		int radius = context->GetVar(String("radius")).IntValue();
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageDrawCircleV(&dst, center, radius, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDrawCircleV", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("posX", Value::zero);
+	i->AddParam("posY", Value::zero);
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		int posX = context->GetVar(String("posX")).IntValue();
+		int posY = context->GetVar(String("posY")).IntValue();
+		int width = context->GetVar(String("width")).IntValue();
+		int height = context->GetVar(String("height")).IntValue();
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageDrawRectangle(&dst, posX, posY, width, height, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDrawRectangle", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("rec");
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		Rectangle rec = ValueToRectangle(context->GetVar(String("rec")));
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageDrawRectangleRec(&dst, rec, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDrawRectangleRec", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("rec");
+	i->AddParam("thick", Value(1));
+	i->AddParam("color", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		Rectangle rec = ValueToRectangle(context->GetVar(String("rec")));
+		int thick = context->GetVar(String("thick")).IntValue();
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageDrawRectangleLines(&dst, rec, thick, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDrawRectangleLines", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("src");
+	i->AddParam("srcRec");
+	i->AddParam("dstRec");
+	i->AddParam("tint", ColorToValue(WHITE));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		Image src = ValueToImage(context->GetVar(String("src")));
+		Rectangle srcRec = ValueToRectangle(context->GetVar(String("srcRec")));
+		Rectangle dstRec = ValueToRectangle(context->GetVar(String("dstRec")));
+		Color tint = ValueToColor(context->GetVar(String("tint")));
+		ImageDraw(&dst, src, srcRec, dstRec, tint);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDraw", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("dst");
+	i->AddParam("text");
+	i->AddParam("posX", Value::zero);
+	i->AddParam("posY", Value::zero);
+	i->AddParam("fontSize", Value(20));
+	i->AddParam("color", ColorToValue(BLACK));
+	i->code = INTRINSIC_LAMBDA {
+		Image dst = ValueToImage(context->GetVar(String("dst")));
+		String text = context->GetVar(String("text")).ToString();
+		int posX = context->GetVar(String("posX")).IntValue();
+		int posY = context->GetVar(String("posY")).IntValue();
+		int fontSize = context->GetVar(String("fontSize")).IntValue();
+		Color color = ValueToColor(context->GetVar(String("color")));
+		ImageDrawText(&dst, text.c_str(), posX, posY, fontSize, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("ImageDrawText", i->GetFunc());
+
+	// Texture configuration
+
+	i = Intrinsic::Create("");
+	i->AddParam("texture");
+	i->AddParam("filter");
+	i->code = INTRINSIC_LAMBDA {
+		Texture tex = ValueToTexture(context->GetVar(String("texture")));
+		int filter = context->GetVar(String("filter")).IntValue();
+		SetTextureFilter(tex, filter);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetTextureFilter", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("texture");
+	i->AddParam("wrap");
+	i->code = INTRINSIC_LAMBDA {
+		Texture tex = ValueToTexture(context->GetVar(String("texture")));
+		int wrap = context->GetVar(String("wrap")).IntValue();
+		SetTextureWrap(tex, wrap);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetTextureWrap", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("texture");
+	i->code = INTRINSIC_LAMBDA {
+		Texture tex = ValueToTexture(context->GetVar(String("texture")));
+		GenTextureMipmaps(&tex);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("GenTextureMipmaps", i->GetFunc());
+}
+
+//--------------------------------------------------------------------------------
+// rtext methods
+//--------------------------------------------------------------------------------
+
+static void AddRTextMethods(ValueDict raylibModule) {
+	Intrinsic *i;
+
+	// Font loading
+
+	i = Intrinsic::Create("");
+	i->AddParam("fileName");
+	i->code = INTRINSIC_LAMBDA {
+		if (partialResult.Done()) {
+			// First call - start the async fetch
+			String path = context->GetVar(String("fileName")).ToString();
+
+			// Create a new fetch ID and entry
+			long fetchId = nextFetchId++;
+			FetchData& data = activeFetches[fetchId];
+
+			emscripten_fetch_attr_t attr;
+			emscripten_fetch_attr_init(&attr);
+			strcpy(attr.requestMethod, "GET");
+			attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY | EMSCRIPTEN_FETCH_PERSIST_FILE;
+			attr.onsuccess = fetch_completed;
+			attr.onerror = fetch_completed;
+
+			data.fetch = emscripten_fetch(&attr, path.c_str());
+			printf("LoadFont: Started fetch ID %ld for %s\n", fetchId, path.c_str());
+
+			// Return the fetch ID as partial result
+			return IntrinsicResult(Value((double)fetchId), false);
+		} else {
+			// Subsequent calls - check if fetch is complete
+			long fetchId = (long)partialResult.Result().DoubleValue();
+			auto it = activeFetches.find(fetchId);
+			if (it == activeFetches.end()) {
+				printf("LoadFont: Fetch ID %ld not found!\n", fetchId);
+				return IntrinsicResult::Null;
+			}
+
+			FetchData& data = it->second;
+
+			if (!data.completed) {
+				// Still loading
+				return partialResult;
+			}
+
+			// Fetch is complete
+			emscripten_fetch_t* fetch = data.fetch;
+			printf("LoadFont: Fetch ID %ld complete, status=%d for %s\n", fetchId, data.status, fetch->url);
+
+			if (data.status == 200) {
+				// Success - get file extension and load font from memory
+				const char* url = fetch->url;
+				const char* ext = strrchr(url, '.');
+				if (ext == nullptr) ext = ".ttf";
+
+				Font font = LoadFontFromMemory(ext, (const unsigned char*)fetch->data, (int)fetch->numBytes, 32, nullptr, 0);
+				emscripten_fetch_close(fetch);
+				activeFetches.erase(it);
+				return IntrinsicResult(FontToValue(font));
+			} else {
+				// Error
+				emscripten_fetch_close(fetch);
+				activeFetches.erase(it);
+				return IntrinsicResult::Null;
+			}
+		}
+	};
+	raylibModule.SetValue("LoadFont", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("fileName");
+	i->AddParam("fontSize", Value(20));
+	i->AddParam("codepoints", Value::null);
+	i->AddParam("codepointCount", Value::zero);
+	i->code = INTRINSIC_LAMBDA {
+		if (partialResult.Done()) {
+			// First call - start the async fetch
+			String path = context->GetVar(String("fileName")).ToString();
+
+			// Create a new fetch ID and entry
+			long fetchId = nextFetchId++;
+			FetchData& data = activeFetches[fetchId];
+
+			emscripten_fetch_attr_t attr;
+			emscripten_fetch_attr_init(&attr);
+			strcpy(attr.requestMethod, "GET");
+			attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY | EMSCRIPTEN_FETCH_PERSIST_FILE;
+			attr.onsuccess = fetch_completed;
+			attr.onerror = fetch_completed;
+
+			data.fetch = emscripten_fetch(&attr, path.c_str());
+			printf("LoadFontEx: Started fetch ID %ld for %s\n", fetchId, path.c_str());
+
+			// Return the fetch ID as partial result
+			return IntrinsicResult(Value((double)fetchId), false);
+		} else {
+			// Subsequent calls - check if fetch is complete
+			long fetchId = (long)partialResult.Result().DoubleValue();
+			auto it = activeFetches.find(fetchId);
+			if (it == activeFetches.end()) {
+				printf("LoadFontEx: Fetch ID %ld not found!\n", fetchId);
+				return IntrinsicResult::Null;
+			}
+
+			FetchData& data = it->second;
+
+			if (!data.completed) {
+				// Still loading
+				return partialResult;
+			}
+
+			// Fetch is complete
+			emscripten_fetch_t* fetch = data.fetch;
+			printf("LoadFontEx: Fetch ID %ld complete, status=%d for %s\n", fetchId, data.status, fetch->url);
+
+			if (data.status == 200) {
+				// Success - get file extension and load font from memory
+				const char* url = fetch->url;
+				const char* ext = strrchr(url, '.');
+				if (ext == nullptr) ext = ".ttf";
+
+				int fontSize = context->GetVar(String("fontSize")).IntValue();
+				// For now, ignore codepoints parameter and load all
+				Font font = LoadFontFromMemory(ext, (const unsigned char*)fetch->data, (int)fetch->numBytes, fontSize, nullptr, 0);
+				emscripten_fetch_close(fetch);
+				activeFetches.erase(it);
+				return IntrinsicResult(FontToValue(font));
+			} else {
+				// Error
+				emscripten_fetch_close(fetch);
+				activeFetches.erase(it);
+				return IntrinsicResult::Null;
+			}
+		}
+	};
+	raylibModule.SetValue("LoadFontEx", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->AddParam("key", ColorToValue(Color{255, 0, 255, 255}));
+	i->AddParam("firstChar", Value(32));
+	i->code = INTRINSIC_LAMBDA {
+		Image image = ValueToImage(context->GetVar(String("image")));
+		Color key = ValueToColor(context->GetVar(String("key")));
+		int firstChar = context->GetVar(String("firstChar")).IntValue();
+		Font font = LoadFontFromImage(image, key, firstChar);
+		return IntrinsicResult(FontToValue(font));
+	};
+	raylibModule.SetValue("LoadFontFromImage", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("font");
+	i->code = INTRINSIC_LAMBDA {
+		Font font = ValueToFont(context->GetVar(String("font")));
+		UnloadFont(font);
+		// Free the heap-allocated Font struct
+		ValueDict map = context->GetVar(String("font")).GetDict();
+		Value handleVal = map.Lookup(String("_handle"), Value::zero);
+		Font* fontPtr = (Font*)(long)handleVal.IntValue();
+		delete fontPtr;
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("UnloadFont", i->GetFunc());
+
+	// Text drawing
+
+	i = Intrinsic::Create("");
+	i->AddParam("posX", Value::zero);
+	i->AddParam("posY", Value::zero);
+	i->code = INTRINSIC_LAMBDA {
+		int posX = context->GetVar(String("posX")).IntValue();
+		int posY = context->GetVar(String("posY")).IntValue();
+		DrawFPS(posX, posY);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("DrawFPS", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("text");
+	i->AddParam("posX", Value::zero);
+	i->AddParam("posY", Value::zero);
+	i->AddParam("fontSize", Value(20));
+	i->AddParam("color", ColorToValue(BLACK));
+	i->code = INTRINSIC_LAMBDA {
+		String text = context->GetVar(String("text")).ToString();
+		int posX = context->GetVar(String("posX")).IntValue();
+		int posY = context->GetVar(String("posY")).IntValue();
+		int fontSize = context->GetVar(String("fontSize")).IntValue();
+		Color color = ValueToColor(context->GetVar(String("color")));
+		DrawText(text.c_str(), posX, posY, fontSize, color);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("DrawText", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("font");
+	i->AddParam("text");
+	i->AddParam("position", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("fontSize", Value(20));
+	i->AddParam("spacing", Value::zero);
+	i->AddParam("tint", ColorToValue(BLACK));
+	i->code = INTRINSIC_LAMBDA {
+		Font font = ValueToFont(context->GetVar(String("font")));
+		String text = context->GetVar(String("text")).ToString();
+		Vector2 position = ValueToVector2(context->GetVar(String("position")));
+		float fontSize = context->GetVar(String("fontSize")).FloatValue();
+		float spacing = context->GetVar(String("spacing")).FloatValue();
+		Color tint = ValueToColor(context->GetVar(String("tint")));
+		DrawTextEx(font, text.c_str(), position, fontSize, spacing, tint);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("DrawTextEx", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("font");
+	i->AddParam("text");
+	i->AddParam("position", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("origin", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("rotation", Value::zero);
+	i->AddParam("fontSize", Value(20));
+	i->AddParam("spacing", Value::zero);
+	i->AddParam("tint", ColorToValue(BLACK));
+	i->code = INTRINSIC_LAMBDA {
+		Font font = ValueToFont(context->GetVar(String("font")));
+		String text = context->GetVar(String("text")).ToString();
+		Vector2 position = ValueToVector2(context->GetVar(String("position")));
+		Vector2 origin = ValueToVector2(context->GetVar(String("origin")));
+		float rotation = context->GetVar(String("rotation")).FloatValue();
+		float fontSize = context->GetVar(String("fontSize")).FloatValue();
+		float spacing = context->GetVar(String("spacing")).FloatValue();
+		Color tint = ValueToColor(context->GetVar(String("tint")));
+		DrawTextPro(font, text.c_str(), position, origin, rotation, fontSize, spacing, tint);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("DrawTextPro", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("font");
+	i->AddParam("codepoint");
+	i->AddParam("position", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("fontSize", Value(20));
+	i->AddParam("tint", ColorToValue(BLACK));
+	i->code = INTRINSIC_LAMBDA {
+		Font font = ValueToFont(context->GetVar(String("font")));
+		int codepoint = context->GetVar(String("codepoint")).IntValue();
+		Vector2 position = ValueToVector2(context->GetVar(String("position")));
+		float fontSize = context->GetVar(String("fontSize")).FloatValue();
+		Color tint = ValueToColor(context->GetVar(String("tint")));
+		DrawTextCodepoint(font, codepoint, position, fontSize, tint);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("DrawTextCodepoint", i->GetFunc());
+
+	// Text measurement
+
+	i = Intrinsic::Create("");
+	i->AddParam("text");
+	i->AddParam("fontSize", Value(20));
+	i->code = INTRINSIC_LAMBDA {
+		String text = context->GetVar(String("text")).ToString();
+		int fontSize = context->GetVar(String("fontSize")).IntValue();
+		int width = MeasureText(text.c_str(), fontSize);
+		return IntrinsicResult(Value(width));
+	};
+	raylibModule.SetValue("MeasureText", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("font");
+	i->AddParam("text");
+	i->AddParam("fontSize", Value(20));
+	i->AddParam("spacing", Value::zero);
+	i->code = INTRINSIC_LAMBDA {
+		Font font = ValueToFont(context->GetVar(String("font")));
+		String text = context->GetVar(String("text")).ToString();
+		float fontSize = context->GetVar(String("fontSize")).FloatValue();
+		float spacing = context->GetVar(String("spacing")).FloatValue();
+		Vector2 size = MeasureTextEx(font, text.c_str(), fontSize, spacing);
+		ValueDict result;
+		result.SetValue(String("x"), Value(size.x));
+		result.SetValue(String("y"), Value(size.y));
+		return IntrinsicResult(Value(result));
+	};
+	raylibModule.SetValue("MeasureTextEx", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("font");
+	i->AddParam("codepoint");
+	i->code = INTRINSIC_LAMBDA {
+		Font font = ValueToFont(context->GetVar(String("font")));
+		int codepoint = context->GetVar(String("codepoint")).IntValue();
+		int index = GetGlyphIndex(font, codepoint);
+		return IntrinsicResult(Value(index));
+	};
+	raylibModule.SetValue("GetGlyphIndex", i->GetFunc());
 }
 
 //--------------------------------------------------------------------------------
@@ -487,9 +1344,9 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	// Pixel drawing
 
 	i = Intrinsic::Create("");
-	i->AddParam("posX");
-	i->AddParam("posY");
-	i->AddParam("color");
+	i->AddParam("posX", Value::zero);
+	i->AddParam("posY", Value::zero);
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		int posX = context->GetVar(String("posX")).IntValue();
 		int posY = context->GetVar(String("posY")).IntValue();
@@ -500,8 +1357,8 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawPixel", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("position");
-	i->AddParam("color");
+	i->AddParam("position", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 position = ValueToVector2(context->GetVar(String("position")));
 		Color color = ValueToColor(context->GetVar(String("color")));
@@ -513,11 +1370,11 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	// Line drawing
 
 	i = Intrinsic::Create("");
-	i->AddParam("startPosX");
-	i->AddParam("startPosY");
-	i->AddParam("endPosX");
-	i->AddParam("endPosY");
-	i->AddParam("color");
+	i->AddParam("startPosX", Value::zero);
+	i->AddParam("startPosY", Value::zero);
+	i->AddParam("endPosX", Value::zero);
+	i->AddParam("endPosY", Value::zero);
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		int startPosX = context->GetVar(String("startPosX")).IntValue();
 		int startPosY = context->GetVar(String("startPosY")).IntValue();
@@ -530,9 +1387,9 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawLine", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("startPos");
-	i->AddParam("endPos");
-	i->AddParam("color");
+	i->AddParam("startPos", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("endPos", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 startPos = ValueToVector2(context->GetVar(String("startPos")));
 		Vector2 endPos = ValueToVector2(context->GetVar(String("endPos")));
@@ -543,10 +1400,10 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawLineV", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("startPos");
-	i->AddParam("endPos");
-	i->AddParam("thick");
-	i->AddParam("color");
+	i->AddParam("startPos", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("endPos", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("thick", Value(1));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 startPos = ValueToVector2(context->GetVar(String("startPos")));
 		Vector2 endPos = ValueToVector2(context->GetVar(String("endPos")));
@@ -560,10 +1417,10 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	// Circle drawing
 
 	i = Intrinsic::Create("");
-	i->AddParam("centerX");
-	i->AddParam("centerY");
-	i->AddParam("radius");
-	i->AddParam("color");
+	i->AddParam("centerX", Value(100));
+	i->AddParam("centerY", Value(100));
+	i->AddParam("radius", Value(32));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		int centerX = context->GetVar(String("centerX")).IntValue();
 		int centerY = context->GetVar(String("centerY")).IntValue();
@@ -575,9 +1432,9 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawCircle", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("center");
-	i->AddParam("radius");
-	i->AddParam("color");
+	i->AddParam("center", Vector2ToValue(Vector2{100, 100}));
+	i->AddParam("radius", Value(32));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 center = ValueToVector2(context->GetVar(String("center")));
 		float radius = context->GetVar(String("radius")).FloatValue();
@@ -588,10 +1445,10 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawCircleV", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("centerX");
-	i->AddParam("centerY");
-	i->AddParam("radius");
-	i->AddParam("color");
+	i->AddParam("centerX", Value(100));
+	i->AddParam("centerY", Value(100));
+	i->AddParam("radius", Value(32));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		int centerX = context->GetVar(String("centerX")).IntValue();
 		int centerY = context->GetVar(String("centerY")).IntValue();
@@ -605,11 +1462,11 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	// Ellipse drawing
 
 	i = Intrinsic::Create("");
-	i->AddParam("centerX");
-	i->AddParam("centerY");
-	i->AddParam("radiusH");
-	i->AddParam("radiusV");
-	i->AddParam("color");
+	i->AddParam("centerX", Value(100));
+	i->AddParam("centerY", Value(100));
+	i->AddParam("radiusH", Value(32));
+	i->AddParam("radiusV", Value(32));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		int centerX = context->GetVar(String("centerX")).IntValue();
 		int centerY = context->GetVar(String("centerY")).IntValue();
@@ -622,11 +1479,11 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawEllipse", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("centerX");
-	i->AddParam("centerY");
-	i->AddParam("radiusH");
-	i->AddParam("radiusV");
-	i->AddParam("color");
+	i->AddParam("centerX", Value(100));
+	i->AddParam("centerY", Value(100));
+	i->AddParam("radiusH", Value(32));
+	i->AddParam("radiusV", Value(32));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		int centerX = context->GetVar(String("centerX")).IntValue();
 		int centerY = context->GetVar(String("centerY")).IntValue();
@@ -641,13 +1498,13 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	// Ring drawing
 
 	i = Intrinsic::Create("");
-	i->AddParam("center");
-	i->AddParam("innerRadius");
-	i->AddParam("outerRadius");
-	i->AddParam("startAngle");
-	i->AddParam("endAngle");
-	i->AddParam("segments");
-	i->AddParam("color");
+	i->AddParam("center", Vector2ToValue(Vector2{100, 100}));
+	i->AddParam("innerRadius", Value(20));
+	i->AddParam("outerRadius", Value(32));
+	i->AddParam("startAngle", Value::zero);
+	i->AddParam("endAngle", Value(360));
+	i->AddParam("segments", Value(36));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 center = ValueToVector2(context->GetVar(String("center")));
 		float innerRadius = context->GetVar(String("innerRadius")).FloatValue();
@@ -662,13 +1519,13 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawRing", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("center");
-	i->AddParam("innerRadius");
-	i->AddParam("outerRadius");
-	i->AddParam("startAngle");
-	i->AddParam("endAngle");
-	i->AddParam("segments");
-	i->AddParam("color");
+	i->AddParam("center", Vector2ToValue(Vector2{100, 100}));
+	i->AddParam("innerRadius", Value(20));
+	i->AddParam("outerRadius", Value(32));
+	i->AddParam("startAngle", Value::zero);
+	i->AddParam("endAngle", Value(360));
+	i->AddParam("segments", Value(36));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 center = ValueToVector2(context->GetVar(String("center")));
 		float innerRadius = context->GetVar(String("innerRadius")).FloatValue();
@@ -685,11 +1542,11 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	// Rectangle drawing
 
 	i = Intrinsic::Create("");
-	i->AddParam("x");
-	i->AddParam("y");
-	i->AddParam("width");
-	i->AddParam("height");
-	i->AddParam("color");
+	i->AddParam("x", Value::zero);
+	i->AddParam("y", Value::zero);
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		int x = context->GetVar(String("x")).IntValue();
 		int y = context->GetVar(String("y")).IntValue();
@@ -702,9 +1559,9 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawRectangle", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("position");
-	i->AddParam("size");
-	i->AddParam("color");
+	i->AddParam("position", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("size", Vector2ToValue(Vector2{256, 256}));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 position = ValueToVector2(context->GetVar(String("position")));
 		Vector2 size = ValueToVector2(context->GetVar(String("size")));
@@ -716,7 +1573,7 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 
 	i = Intrinsic::Create("");
 	i->AddParam("rec");
-	i->AddParam("color");
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Rectangle rec = ValueToRectangle(context->GetVar(String("rec")));
 		Color color = ValueToColor(context->GetVar(String("color")));
@@ -727,9 +1584,9 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 
 	i = Intrinsic::Create("");
 	i->AddParam("rec");
-	i->AddParam("origin");
-	i->AddParam("rotation");
-	i->AddParam("color");
+	i->AddParam("origin", Vector2ToValue(Vector2{0, 0}));
+	i->AddParam("rotation", Value::zero);
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Rectangle rec = ValueToRectangle(context->GetVar(String("rec")));
 		Vector2 origin = ValueToVector2(context->GetVar(String("origin")));
@@ -753,8 +1610,8 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 
 	i = Intrinsic::Create("");
 	i->AddParam("rec");
-	i->AddParam("lineThick");
-	i->AddParam("color");
+	i->AddParam("lineThick", Value(1));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Rectangle rec = ValueToRectangle(context->GetVar(String("rec")));
 		float lineThick = context->GetVar(String("lineThick")).FloatValue();
@@ -766,9 +1623,9 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 
 	i = Intrinsic::Create("");
 	i->AddParam("rec");
-	i->AddParam("roundness");
-	i->AddParam("segments");
-	i->AddParam("color");
+	i->AddParam("roundness", Value(0.5));
+	i->AddParam("segments", Value(36));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Rectangle rec = ValueToRectangle(context->GetVar(String("rec")));
 		float roundness = context->GetVar(String("roundness")).FloatValue();
@@ -781,9 +1638,9 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 
 	i = Intrinsic::Create("");
 	i->AddParam("rec");
-	i->AddParam("roundness");
-	i->AddParam("segments");
-	i->AddParam("color");
+	i->AddParam("roundness", Value(0.5));
+	i->AddParam("segments", Value(36));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Rectangle rec = ValueToRectangle(context->GetVar(String("rec")));
 		float roundness = context->GetVar(String("roundness")).FloatValue();
@@ -795,12 +1652,12 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawRectangleRoundedLines", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("posX");
-	i->AddParam("posY");
-	i->AddParam("width");
-	i->AddParam("height");
-	i->AddParam("color1");
-	i->AddParam("color2");
+	i->AddParam("posX", Value::zero);
+	i->AddParam("posY", Value::zero);
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("color1", ColorToValue(WHITE));
+	i->AddParam("color2", ColorToValue(BLACK));
 	i->code = INTRINSIC_LAMBDA {
 		int posX = context->GetVar(String("posX")).IntValue();
 		int posY = context->GetVar(String("posY")).IntValue();
@@ -814,12 +1671,12 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawRectangleGradientV", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("posX");
-	i->AddParam("posY");
-	i->AddParam("width");
-	i->AddParam("height");
-	i->AddParam("color1");
-	i->AddParam("color2");
+	i->AddParam("posX", Value::zero);
+	i->AddParam("posY", Value::zero);
+	i->AddParam("width", Value(256));
+	i->AddParam("height", Value(256));
+	i->AddParam("color1", ColorToValue(WHITE));
+	i->AddParam("color2", ColorToValue(BLACK));
 	i->code = INTRINSIC_LAMBDA {
 		int posX = context->GetVar(String("posX")).IntValue();
 		int posY = context->GetVar(String("posY")).IntValue();
@@ -855,7 +1712,7 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	i->AddParam("v1");
 	i->AddParam("v2");
 	i->AddParam("v3");
-	i->AddParam("color");
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 v1 = ValueToVector2(context->GetVar(String("v1")));
 		Vector2 v2 = ValueToVector2(context->GetVar(String("v2")));
@@ -877,7 +1734,7 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	i->AddParam("v1");
 	i->AddParam("v2");
 	i->AddParam("v3");
-	i->AddParam("color");
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 v1 = ValueToVector2(context->GetVar(String("v1")));
 		Vector2 v2 = ValueToVector2(context->GetVar(String("v2")));
@@ -891,11 +1748,11 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	// Polygon drawing
 
 	i = Intrinsic::Create("");
-	i->AddParam("center");
-	i->AddParam("sides");
-	i->AddParam("radius");
-	i->AddParam("rotation");
-	i->AddParam("color");
+	i->AddParam("center", Vector2ToValue(Vector2{100, 100}));
+	i->AddParam("sides", Value(6));
+	i->AddParam("radius", Value(32));
+	i->AddParam("rotation", Value::zero);
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 center = ValueToVector2(context->GetVar(String("center")));
 		int sides = context->GetVar(String("sides")).IntValue();
@@ -908,11 +1765,11 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawPoly", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("center");
-	i->AddParam("sides");
-	i->AddParam("radius");
-	i->AddParam("rotation");
-	i->AddParam("color");
+	i->AddParam("center", Vector2ToValue(Vector2{100, 100}));
+	i->AddParam("sides", Value(6));
+	i->AddParam("radius", Value(32));
+	i->AddParam("rotation", Value::zero);
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 center = ValueToVector2(context->GetVar(String("center")));
 		int sides = context->GetVar(String("sides")).IntValue();
@@ -925,12 +1782,12 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("DrawPolyLines", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("center");
-	i->AddParam("sides");
-	i->AddParam("radius");
-	i->AddParam("rotation");
-	i->AddParam("lineThick");
-	i->AddParam("color");
+	i->AddParam("center", Vector2ToValue(Vector2{100, 100}));
+	i->AddParam("sides", Value(6));
+	i->AddParam("radius", Value(32));
+	i->AddParam("rotation", Value::zero);
+	i->AddParam("lineThick", Value(1));
+	i->AddParam("color", ColorToValue(WHITE));
 	i->code = INTRINSIC_LAMBDA {
 		Vector2 center = ValueToVector2(context->GetVar(String("center")));
 		int sides = context->GetVar(String("sides")).IntValue();
@@ -1053,7 +1910,7 @@ static void AddRCoreMethods(ValueDict raylibModule) {
 	raylibModule.SetValue("EndDrawing", i->GetFunc());
 
 	i = Intrinsic::Create("");
-	i->AddParam("color");
+	i->AddParam("color", ColorToValue(BLACK));
 	i->code = INTRINSIC_LAMBDA {
 		Value colorVal = context->GetVar(String("color"));
 		Color color = ValueToColor(colorVal);
@@ -1322,6 +2179,20 @@ static void AddConstants(ValueDict raylibModule) {
 	raylibModule.SetValue("MOUSE_CURSOR_RESIZE_NESW", Value(MOUSE_CURSOR_RESIZE_NESW));
 	raylibModule.SetValue("MOUSE_CURSOR_RESIZE_ALL", Value(MOUSE_CURSOR_RESIZE_ALL));
 	raylibModule.SetValue("MOUSE_CURSOR_NOT_ALLOWED", Value(MOUSE_CURSOR_NOT_ALLOWED));
+
+	// Add texture filter mode constants
+	raylibModule.SetValue("TEXTURE_FILTER_POINT", Value(TEXTURE_FILTER_POINT));
+	raylibModule.SetValue("TEXTURE_FILTER_BILINEAR", Value(TEXTURE_FILTER_BILINEAR));
+	raylibModule.SetValue("TEXTURE_FILTER_TRILINEAR", Value(TEXTURE_FILTER_TRILINEAR));
+	raylibModule.SetValue("TEXTURE_FILTER_ANISOTROPIC_4X", Value(TEXTURE_FILTER_ANISOTROPIC_4X));
+	raylibModule.SetValue("TEXTURE_FILTER_ANISOTROPIC_8X", Value(TEXTURE_FILTER_ANISOTROPIC_8X));
+	raylibModule.SetValue("TEXTURE_FILTER_ANISOTROPIC_16X", Value(TEXTURE_FILTER_ANISOTROPIC_16X));
+
+	// Add texture wrap mode constants
+	raylibModule.SetValue("TEXTURE_WRAP_REPEAT", Value(TEXTURE_WRAP_REPEAT));
+	raylibModule.SetValue("TEXTURE_WRAP_CLAMP", Value(TEXTURE_WRAP_CLAMP));
+	raylibModule.SetValue("TEXTURE_WRAP_MIRROR_REPEAT", Value(TEXTURE_WRAP_MIRROR_REPEAT));
+	raylibModule.SetValue("TEXTURE_WRAP_MIRROR_CLAMP", Value(TEXTURE_WRAP_MIRROR_CLAMP));
 }
 
 //--------------------------------------------------------------------------------
@@ -1338,6 +2209,9 @@ void AddRaylibIntrinsics() {
 	f = Intrinsic::Create("Texture");
 	f->code = INTRINSIC_LAMBDA { return IntrinsicResult(TextureClass()); };
 
+	f = Intrinsic::Create("Font");
+	f->code = INTRINSIC_LAMBDA { return IntrinsicResult(FontClass()); };
+
 	// Create and register the main raylib module
 	f = Intrinsic::Create("raylib");
 	f->code = INTRINSIC_LAMBDA {
@@ -1347,6 +2221,7 @@ void AddRaylibIntrinsics() {
 			AddRCoreMethods(raylibModule);
 			AddRShapesMethods(raylibModule);
 			AddRTexturesMethods(raylibModule);
+			AddRTextMethods(raylibModule);
 			AddConstants(raylibModule);
 		}
 

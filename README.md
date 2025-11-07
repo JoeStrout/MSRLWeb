@@ -1,202 +1,128 @@
-# MSRLWeb - MiniScript + Raylib Web
+# MSRLWeb - Make Web Games with MiniScript + Raylib
 
-A web-based demonstration combining [MiniScript](https://miniscript.org) scripting with [Raylib](https://www.raylib.com/) graphics, compiled to WebAssembly using Emscripten.
+**Write 2D games in [MiniScript](https://miniscript.org), powered by [Raylib](https://www.raylib.com/) graphics, running in your browser via WebAssembly.**
 
-## Try it now!
+No compiler needed. Just edit your MiniScript code and assets, refresh the browser, and play!
 
-Go see the online demo at [https://joestrout.github.io/MSRLWeb/](https://joestrout.github.io/MSRLWeb/).
+## 🎮 Try It Now!
 
-## Prerequisites
+**[Play the live demo](https://joestrout.github.io/MSRLWeb/)** - See MSRLWeb in action!
 
-1. **MiniScript-cpp**: C++ implementation of MiniScript
-   - Clone from: https://github.com/JoeStrout/miniscript
-   - Must be in a folder named `MiniScript-cpp` **next to** the `MSRLWeb` folder
-   - Directory structure should be:
-     ```
-     parent-folder/
-     ├── MiniScript-cpp/     (cloned from GitHub)
-     └── MSRLWeb/            (this project)
-     ```
+## 📦 Download & Use
 
-2. **Raylib**: Graphics library
-   - Download/clone from: https://www.raylib.com/ or https://github.com/raysan5/raylib
-   - Create a symlink in the MSRLWeb directory pointing to your raylib installation:
-     ```bash
-     cd MSRLWeb
-     ln -s /path/to/your/raylib raylib
-     ```
-   - Build raylib for web: `cd raylib/src && make PLATFORM=PLATFORM_WEB`
+**[Download the latest release](https://github.com/JoeStrout/MSRLWeb/releases/latest)**
 
-3. **Emscripten SDK**: Required for compiling to WebAssembly
-   - Install from: https://emscripten.org/docs/getting_started/downloads.html
-   - The build script will automatically activate it if found at `raylib/../emsdk`
-   - Or activate manually: `source /path/to/emsdk/emsdk_env.sh`
+Unzip and you're ready to go:
 
-4. **CMake**: Build system (version 3.12 or higher)
-   - Install via package manager or from: https://cmake.org/
+1. Start a web server in the unzipped folder:
+   ```bash
+   python3 -m http.server 8000
+   ```
 
-## Project Structure
+2. Open your browser to: **http://localhost:8000**
 
-```
-MSRLWeb/
-├── src/
-│   ├── main.cpp              # Main program (loads and runs MiniScript)
-│   ├── RaylibIntrinsics.cpp  # Raylib intrinsics for MiniScript
-│   └── RaylibIntrinsics.h
-├── assets/
-│   └── main.ms               # Your MiniScript program (main entry point)
-├── MiniScript/               # Symlink to ../MiniScript-cpp/src/MiniScript
-├── raylib/                   # Symlink to raylib source (you must create)
-├── build/                    # Build output (generated)
-├── Notes/                    # Documentation and reference materials
-├── CMakeLists.txt            # CMake build configuration
-├── shell.html                # Custom HTML template for the web page
-├── build.sh                  # Convenience build script
-├── run.sh                    # Convenience run script
-└── README.md                 # This file
-```
+3. Edit `assets/main.ms` to change the game - then refresh to see your changes.
 
-**Note:** The `MiniScript` symlink points to `../MiniScript-cpp/src/MiniScript` (relative path).
-The `raylib` symlink must be created by you and is gitignored.
+That's it! No build tools, no compilation, no hassle.
 
-## Building
+## ✨ What Is This?
 
-### Quick Build
+MSRLWeb lets you create 2D games and interactive graphics using:
 
-```bash
-./build.sh
-```
+- **[MiniScript](https://miniscript.org)** - A simple, elegant scripting language (like Python meets JavaScript)
+- **[Raylib](https://www.raylib.com/)** - A powerful 2D/3D game programming library
+- **WebAssembly** - Runs anywhere, right in the browser
 
-### Manual Build
+Your game logic lives in **easy-to-edit MiniScript files**. Change the code, refresh the browser, see results instantly. No recompiling, no build steps.
 
-```bash
-# Activate Emscripten
-source /path/to/emsdk/emsdk_env.sh
+## 🚀 Quick Example
 
-# Create build directory
-mkdir -p build
-cd build
-
-# Configure
-emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
-
-# Build
-cmake --build . --config Release
-```
-
-## Running
-
-### Quick Run
-
-```bash
-./run.sh
-```
-
-Then open http://localhost:8000/msrlweb.html in your browser (on Mac, this should happen automatically).
-
-### Manual Run
-
-```bash
-cd build
-python3 -m http.server 8000
-```
-
-Then open http://localhost:8000/msrlweb.html in your browser.
-
-## What It Does
-
-The application is **MiniScript-driven**, meaning your game/app logic is written in MiniScript:
-
-1. Initializes a Raylib window (960x640)
-2. Creates a MiniScript interpreter with Raylib intrinsics
-3. Shows a loading screen while fetching `assets/main.ms`
-4. Loads and runs your MiniScript code from `assets/main.ms`
-5. Your script has full access to Raylib functions via the `raylib` module
-
-This architecture allows you to:
-- Write game logic in MiniScript (easy to modify, no recompile)
-- Use Raylib for graphics, input, audio, etc.
-- Edit `assets/main.ms` and refresh the browser to see changes
-
-## Features
-
-- **MiniScript-Driven**: Your game/app is written in MiniScript, not C++
-- **Raylib Graphics**: Access to Raylib's 2D/3D graphics via intrinsics
-- **Hot Reload**: Edit `assets/main.ms` and refresh browser (no rebuild needed)
-- **WebAssembly**: Runs in any modern web browser
-- **Async Loading**: Scripts loaded at runtime using Emscripten FETCH API
-
-## Available Raylib Functions
-
-See [RAYLIB_API.md](RAYLIB_API.md) for a complete list of all Raylib functions supported by MSRLWeb.  For more details on these functions, see the [official Raylib cheat sheet](https://www.raylib.com/cheatsheet/cheatsheet.html).
-
-
-## Example MiniScript Code
+Here's a complete bouncing sprite in MiniScript:
 
 ```miniscript
-// assets/main.ms
-print "main.ms running"  // (appears in the console output)
+// Load a sprite
+spriteTex = raylib.LoadTexture("assets/Wumpus.png")
 
+// Starting position and velocity
 x = 100; y = 100
-dx = 10; dy = 10
+dx = 5; dy = 5
 
+// Game loop
 while true
-	raylib.BeginDrawing
-	
-	raylib.ClearBackground raylib.BLACK
-	raylib.DrawRectangle x, y, 200, 150, raylib.BLUE
-	x += dx; y += dy
-	if x + 200 > 960 and dx > 0 then dx = -dx
-	if x < 0 and dx < 0 then dx = -dx
-	if y + 150 > 640 and dy > 0 then dy = -dy
-	if y < 0 and dy < 0 then dy = -dy
-	
-	raylib.EndDrawing
-	yield
+    raylib.BeginDrawing
+    raylib.ClearBackground raylib.RAYWHITE
+
+    // Move the ball
+    x += dx
+    y += dy
+
+    // Bounce off edges
+    if x > 960 - 64 or x < 0 then dx = -dx
+    if y > 640 - 64 or y < 0 then dy = -dy
+
+    // Draw it
+    raylib.DrawTexture spriteTex, x, y, raylib.WHITE
+    raylib.DrawFPS
+
+    raylib.EndDrawing
+    yield  // Let the browser breathe
 end while
 ```
 
-## Build Configuration
+That's it! Edit, save, refresh.
 
-The CMakeLists.txt includes:
-- All MiniScript core source files
-- Raylib web library linking
-- Emscripten flags:
-  - `-s ASYNCIFY`: Allows async operations
-  - `-s FETCH=1`: Enables runtime file loading
-  - `-s ALLOW_MEMORY_GROWTH=1`: Dynamic memory allocation
-  - Optimized for size (`-Os`)
+## 📚 What's Available?
 
-## Next Steps
+MSRLWeb provides **174 Raylib functions** organized into modules:
 
-- Add more Raylib intrinsics to MiniScript
-- Implement runtime script loading
-- Add interactive REPL in the web UI
-- Create example games/demos
+- **rcore** (29 functions) - Window, input, timing, mouse, keyboard
+- **rshapes** (35 functions) - Circles, rectangles, lines, polygons, collision detection
+- **rtextures** (45 functions) - Load/draw images, procedural textures, image manipulation
+- **rtext** (12 functions) - Load fonts, draw text, measure text
+- **raudio** (53 functions) - Sound effects, music streaming, spatial audio
 
-## Troubleshooting
+See **[RAYLIB_API.md](RAYLIB_API.md)** for the complete function list.
 
-### Raylib library not found
-
-Make sure raylib is built for web:
-```bash
-cd raylib/src
-make PLATFORM=PLATFORM_WEB
+All functions have sensible defaults, so you can start simple:
+```miniscript
+raylib.DrawCircle 100, 100, 50, raylib.RED  // Works!
+raylib.DrawRectangle                        // Also works! (uses defaults)
 ```
 
-### Emscripten not found
+## 🎯 Who Is This For?
 
-Activate the Emscripten environment:
-```bash
-source /path/to/emsdk/emsdk_env.sh
-```
+- **Game developers** who want rapid prototyping without build tools
+- **Educators** teaching game development with a simple language
+- **Hobbyists** making web games with minimal friction
+- **Anyone** who wants to try Raylib without installing C/C++ toolchains
 
-### Build fails with missing symbols
+## 🎓 Learning Resources
 
-Ensure all MiniScript source files are included in CMakeLists.txt's `MINISCRIPT_SOURCES`.
+**MiniScript:**
+- [Interactive Tutorial](https://miniscript.org/tryit/) - Learn by doing
+- [Quick Reference](https://miniscript.org/files/MiniScript-QuickRef.pdf) - Syntax cheat sheet
+- [Language Manual](https://miniscript.org/files/MiniScript-Manual.pdf) - Complete guide
 
-## License
+**Raylib:**
+- [Cheatsheet](https://www.raylib.com/cheatsheet/cheatsheet.html) - All Raylib functions
+- [Examples](https://www.raylib.com/examples.html) - Code samples (in C, but easy to translate)
 
-See individual component licenses:
-- MiniScript: https://miniscript.org
-- Raylib: https://www.raylib.com/license.html
+## 🛠️ Building from Source
+
+Want to hack on MSRLWeb itself? See **[BUILDING.md](BUILDING.md)** for:
+- Setting up the build environment
+- Compiling from source
+- Adding new Raylib intrinsics
+- Creating release packages
+
+## 📄 License
+
+- **MSRLWeb**: [LICENSE](MIT License)
+- **MiniScript**: MIT License - https://miniscript.org
+- **Raylib**: zlib License - https://www.raylib.com/license.html
+
+---
+
+**Happy game making!** 🎮
+
+Have questions or want to share what you've made? Open an [issue](https://github.com/JoeStrout/MSRLWeb/issues) or [discussion](https://github.com/JoeStrout/MSRLWeb/discussions), or [join us on Discord](https://discord.gg/7s6zajx).

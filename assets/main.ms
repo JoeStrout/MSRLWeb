@@ -31,6 +31,7 @@ dx = 10; dy = 10
 print "Move with arrow keys, or click with the mouse."
 while true
 	raylib.BeginDrawing
+	raylib.ClearBackground
 	
 	drawBackground
 	raylib.DrawTexture wumpusTex, x, y, raylib.WHITE

@@ -14,14 +14,16 @@ No compiler needed. Just edit your MiniScript code and assets, refresh the brows
 
 Unzip and you're ready to go:
 
-1. Start a web server in the unzipped folder:
+1. **Start a web server** in the unzipped folder.  If you have Python installed, you can just `cd` to the folder, and do:
    ```bash
    python3 -m http.server 8000
    ```
 
-2. Open your browser to: **http://localhost:8000**
+If you don't have Python, consider [Redbean](https://redbean.dev/).  Any web server will do.
 
-3. Edit `assets/main.ms` to change the game - then refresh to see your changes.
+2. **Open your browser** to: **http://localhost:8000**
+
+3. **Edit** `assets/main.ms` to change the game - then **refresh the web page** to see your changes.
 
 That's it! No build tools, no compilation, no hassle.
 

@@ -66,6 +66,7 @@ set(EMSCRIPTEN_LINK_FLAGS
     -sTOTAL_MEMORY=67108864               # Initial memory (64MB)
     -sSTACK_SIZE=5242880                  # Stack size (5MB)
     -fexceptions                          # Enable C++ exceptions
+    --pre-js ${CMAKE_SOURCE_DIR}/prevent-defaults.js  # Prevent browser defaults for game keys
 )
 
 # Apply flags to target

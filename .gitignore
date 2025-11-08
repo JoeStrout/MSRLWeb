@@ -30,5 +30,6 @@ Thumbs.db
 # Symlinks (user must create these)
 raylib
 
-# Don't ignore shell.html if we create a custom one
+# Don't ignore custom files
 !shell.html
+!prevent-defaults.js

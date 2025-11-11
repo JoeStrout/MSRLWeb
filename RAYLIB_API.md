@@ -8,64 +8,64 @@ Generated from: src/RaylibIntrinsics.cpp
 
 - **rcore**: 29 functions
 - **rshapes**: 35 functions
-- **rtextures**: 45 functions
+- **rtextures**: 49 functions
 - **rtext**: 12 functions
 - **raudio**: 55 functions
-- **Total**: 176 functions
+- **Total**: 180 functions
 
 ## Functions by Module
 
 | rcore | rshapes | rtextures | rtext | raudio |
 |-------|---------|-----------|-------|--------|
-| BeginDrawing | CheckCollisionCircleRec | DrawTexture | DrawFPS | CloseAudioDevice |
-| ClearBackground | CheckCollisionCircles | DrawTextureEx | DrawText | GetMusicTimeLength |
-| EndDrawing | CheckCollisionPointCircle | DrawTexturePro | DrawTextCodepoint | GetMusicTimePlayed |
-| GetCharPressed | CheckCollisionPointRec | DrawTextureRec | DrawTextEx | InitAudioDevice |
-| GetFPS | CheckCollisionPointTriangle | DrawTextureV | DrawTextPro | IsAudioDeviceReady |
-| GetFrameTime | CheckCollisionRecs | GenImageCellular | GetGlyphIndex | IsAudioStreamPlaying |
-| GetKeyPressed | DrawCircle | GenImageChecked | LoadFont | IsAudioStreamProcessed |
-| GetMouseDelta | DrawCircleLines | GenImageColor | LoadFontEx | IsAudioStreamValid |
-| GetMousePosition | DrawCircleV | GenImageGradientLinear | LoadFontFromImage | IsMusicReady |
-| GetMouseWheelMove | DrawEllipse | GenImageGradientRadial | MeasureText | IsMusicStreamPlaying |
-| GetMouseX | DrawEllipseLines | GenImageGradientSquare | MeasureTextEx | IsSoundPlaying |
-| GetMouseY | DrawLine | GenImageWhiteNoise | UnloadFont | IsSoundReady |
-| GetTime | DrawLineEx | GenTextureMipmaps |  | IsWaveReady |
-| HideCursor | DrawLineV | ImageClearBackground |  | LoadAudioStream |
-| IsCursorHidden | DrawPixel | ImageColorBrightness |  | LoadMusicStream |
-| IsCursorOnScreen | DrawPixelV | ImageColorContrast |  | LoadMusicStreamFromMemory |
-| IsKeyDown | DrawPoly | ImageColorGrayscale |  | LoadSound |
-| IsKeyPressed | DrawPolyLines | ImageColorInvert |  | LoadSoundAlias |
-| IsKeyPressedRepeat | DrawPolyLinesEx | ImageColorTint |  | LoadSoundFromWave |
-| IsKeyReleased | DrawRectangle | ImageCopy |  | LoadWave |
-| IsKeyUp | DrawRectangleGradientEx | ImageCrop |  | LoadWaveFromMemory |
-| IsMouseButtonDown | DrawRectangleGradientH | ImageDraw |  | PauseAudioStream |
-| IsMouseButtonPressed | DrawRectangleGradientV | ImageDrawCircle |  | PauseMusicStream |
-| IsMouseButtonReleased | DrawRectangleLines | ImageDrawCircleV |  | PauseSound |
-| IsMouseButtonUp | DrawRectangleLinesEx | ImageDrawLine |  | PlayAudioStream |
-| SetExitKey | DrawRectanglePro | ImageDrawLineV |  | PlayMusicStream |
-| SetMouseCursor | DrawRectangleRec | ImageDrawPixel |  | PlaySound |
-| SetTargetFPS | DrawRectangleRounded | ImageDrawPixelV |  | ResumeAudioStream |
-| ShowCursor | DrawRectangleRoundedLines | ImageDrawRectangle |  | ResumeMusicStream |
-|  | DrawRectangleV | ImageDrawRectangleLines |  | ResumeSound |
-|  | DrawRing | ImageDrawRectangleRec |  | SeekMusicStream |
-|  | DrawRingLines | ImageDrawText |  | SetAudioStreamBufferSizeDefault |
-|  | DrawTriangle | ImageFlipHorizontal |  | SetAudioStreamPan |
-|  | DrawTriangleLines | ImageFlipVertical |  | SetAudioStreamPitch |
-|  | GetCollisionRec | ImageResize |  | SetAudioStreamVolume |
-|  |  | ImageResizeNN |  | SetMasterVolume |
-|  |  | ImageRotateCCW |  | SetMusicPan |
-|  |  | ImageRotateCW |  | SetMusicPitch |
-|  |  | LoadImage |  | SetMusicVolume |
-|  |  | LoadTexture |  | SetSoundPan |
-|  |  | LoadTextureFromImage |  | SetSoundPitch |
-|  |  | SetTextureFilter |  | SetSoundVolume |
-|  |  | SetTextureWrap |  | StopAudioStream |
-|  |  | UnloadImage |  | StopMusicStream |
-|  |  | UnloadTexture |  | StopSound |
-|  |  |  |  | UnloadAudioStream |
-|  |  |  |  | UnloadMusicStream |
-|  |  |  |  | UnloadSound |
-|  |  |  |  | UnloadSoundAlias |
+| BeginDrawing | CheckCollisionCircleRec | BeginTextureMode | DrawFPS | CloseAudioDevice |
+| ClearBackground | CheckCollisionCircles | DrawTexture | DrawText | GetMusicTimeLength |
+| EndDrawing | CheckCollisionPointCircle | DrawTextureEx | DrawTextCodepoint | GetMusicTimePlayed |
+| GetCharPressed | CheckCollisionPointRec | DrawTexturePro | DrawTextEx | InitAudioDevice |
+| GetFPS | CheckCollisionPointTriangle | DrawTextureRec | DrawTextPro | IsAudioDeviceReady |
+| GetFrameTime | CheckCollisionRecs | DrawTextureV | GetGlyphIndex | IsAudioStreamPlaying |
+| GetKeyPressed | DrawCircle | EndTextureMode | LoadFont | IsAudioStreamProcessed |
+| GetMouseDelta | DrawCircleLines | GenImageCellular | LoadFontEx | IsAudioStreamValid |
+| GetMousePosition | DrawCircleV | GenImageChecked | LoadFontFromImage | IsMusicReady |
+| GetMouseWheelMove | DrawEllipse | GenImageColor | MeasureText | IsMusicStreamPlaying |
+| GetMouseX | DrawEllipseLines | GenImageGradientLinear | MeasureTextEx | IsSoundPlaying |
+| GetMouseY | DrawLine | GenImageGradientRadial | UnloadFont | IsSoundReady |
+| GetTime | DrawLineEx | GenImageGradientSquare |  | IsWaveReady |
+| HideCursor | DrawLineV | GenImageWhiteNoise |  | LoadAudioStream |
+| IsCursorHidden | DrawPixel | GenTextureMipmaps |  | LoadMusicStream |
+| IsCursorOnScreen | DrawPixelV | ImageClearBackground |  | LoadMusicStreamFromMemory |
+| IsKeyDown | DrawPoly | ImageColorBrightness |  | LoadSound |
+| IsKeyPressed | DrawPolyLines | ImageColorContrast |  | LoadSoundAlias |
+| IsKeyPressedRepeat | DrawPolyLinesEx | ImageColorGrayscale |  | LoadSoundFromWave |
+| IsKeyReleased | DrawRectangle | ImageColorInvert |  | LoadWave |
+| IsKeyUp | DrawRectangleGradientEx | ImageColorTint |  | LoadWaveFromMemory |
+| IsMouseButtonDown | DrawRectangleGradientH | ImageCopy |  | PauseAudioStream |
+| IsMouseButtonPressed | DrawRectangleGradientV | ImageCrop |  | PauseMusicStream |
+| IsMouseButtonReleased | DrawRectangleLines | ImageDraw |  | PauseSound |
+| IsMouseButtonUp | DrawRectangleLinesEx | ImageDrawCircle |  | PlayAudioStream |
+| SetExitKey | DrawRectanglePro | ImageDrawCircleV |  | PlayMusicStream |
+| SetMouseCursor | DrawRectangleRec | ImageDrawLine |  | PlaySound |
+| SetTargetFPS | DrawRectangleRounded | ImageDrawLineV |  | ResumeAudioStream |
+| ShowCursor | DrawRectangleRoundedLines | ImageDrawPixel |  | ResumeMusicStream |
+|  | DrawRectangleV | ImageDrawPixelV |  | ResumeSound |
+|  | DrawRing | ImageDrawRectangle |  | SeekMusicStream |
+|  | DrawRingLines | ImageDrawRectangleLines |  | SetAudioStreamBufferSizeDefault |
+|  | DrawTriangle | ImageDrawRectangleRec |  | SetAudioStreamPan |
+|  | DrawTriangleLines | ImageDrawText |  | SetAudioStreamPitch |
+|  | GetCollisionRec | ImageFlipHorizontal |  | SetAudioStreamVolume |
+|  |  | ImageFlipVertical |  | SetMasterVolume |
+|  |  | ImageResize |  | SetMusicPan |
+|  |  | ImageResizeNN |  | SetMusicPitch |
+|  |  | ImageRotateCCW |  | SetMusicVolume |
+|  |  | ImageRotateCW |  | SetSoundPan |
+|  |  | LoadImage |  | SetSoundPitch |
+|  |  | LoadRenderTexture |  | SetSoundVolume |
+|  |  | LoadTexture |  | StopAudioStream |
+|  |  | LoadTextureFromImage |  | StopMusicStream |
+|  |  | SetTextureFilter |  | StopSound |
+|  |  | SetTextureWrap |  | UnloadAudioStream |
+|  |  | UnloadImage |  | UnloadMusicStream |
+|  |  | UnloadRenderTexture |  | UnloadSound |
+|  |  | UnloadTexture |  | UnloadSoundAlias |
 |  |  |  |  | UnloadWave |
 |  |  |  |  | UpdateAudioStream |
 |  |  |  |  | UpdateMusicStream |
@@ -75,4 +75,4 @@ Generated from: src/RaylibIntrinsics.cpp
 
 ---
 
-*Generated on Tue Nov 11 04:15:21 EST 2025*
+*Generated on Tue Nov 11 08:01:24 MST 2025*

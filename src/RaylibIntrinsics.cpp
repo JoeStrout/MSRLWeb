@@ -2202,7 +2202,6 @@ static void AddRAudioMethods(ValueDict raylibModule) {
 	i->AddParam("stream");
 	i->AddParam("data");
 	i->code = INTRINSIC_LAMBDA {
-		#include <string>
 		AudioStream stream = ValueToAudioStream(context->GetVar(String("stream")));
 		ValueList data = context->GetVar(String("data")).GetList();
 

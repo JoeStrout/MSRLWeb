@@ -2991,6 +2991,107 @@ static void AddRCoreMethods(ValueDict raylibModule) {
 	};
 	raylibModule.SetValue("SetExitKey", i->GetFunc());
 
+	// Input-related functions: gamepad
+
+	i = Intrinsic::Create("");
+	i->AddParam("gamepad", 0);
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(IsGamepadAvailable(context->GetVar(String("gamepad")).IntValue()));
+	};
+	raylibModule.SetValue("IsGamepadAvailable", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("gamepad", 0);
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetGamepadName(context->GetVar(String("gamepad")).IntValue()));
+	};
+	raylibModule.SetValue("GetGamepadName", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("gamepad", 0);
+	i->AddParam("button");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(IsGamepadButtonPressed(
+			context->GetVar(String("gamepad")).IntValue(),
+			context->GetVar(String("button")).IntValue()));
+	};
+	raylibModule.SetValue("IsGamepadButtonPressed", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("gamepad", 0);
+	i->AddParam("button");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(IsGamepadButtonDown(
+			context->GetVar(String("gamepad")).IntValue(),
+			context->GetVar(String("button")).IntValue()));
+	};
+	raylibModule.SetValue("IsGamepadButtonDown", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("gamepad", 0);
+	i->AddParam("button");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(IsGamepadButtonReleased(
+			context->GetVar(String("gamepad")).IntValue(),
+			context->GetVar(String("button")).IntValue()));
+	};
+	raylibModule.SetValue("IsGamepadButtonReleased", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("gamepad", 0);
+	i->AddParam("button");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(IsGamepadButtonUp(
+			context->GetVar(String("gamepad")).IntValue(),
+			context->GetVar(String("button")).IntValue()));
+	};
+	raylibModule.SetValue("IsGamepadButtonUp", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetGamepadButtonPressed());
+	};
+	raylibModule.SetValue("GetGamepadButtonPressed", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("gamepad", 0);
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetGamepadAxisCount(context->GetVar(String("gamepad")).IntValue()));
+	};
+	raylibModule.SetValue("GetGamepadAxisCount", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("gamepad", 0);
+	i->AddParam("axis");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetGamepadAxisMovement(
+			context->GetVar(String("gamepad")).IntValue(),
+			context->GetVar(String("axis")).IntValue()));
+	};
+	raylibModule.SetValue("GetGamepadAxisMovement", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("mappings");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(SetGamepadMappings(context->GetVar(String("mappings")).ToString().c_str()));
+	};
+	raylibModule.SetValue("SetGamepadMappings", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("gamepad", 0);
+	i->AddParam("leftMotor", 0.0);
+	i->AddParam("rightMotor", 0.0);
+	i->AddParam("duration", 0.0);
+	i->code = INTRINSIC_LAMBDA {
+		SetGamepadVibration(
+			context->GetVar(String("gamepad")).IntValue(),
+			context->GetVar(String("leftMotor")).FloatValue(),
+			context->GetVar(String("rightMotor")).FloatValue(),
+			context->GetVar(String("duration")).FloatValue());
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetGamepadVibration", i->GetFunc());
+
 	// Input-related functions: mouse
 
 	i = Intrinsic::Create("");
@@ -3112,16 +3213,27 @@ static void AddConstants(ValueDict raylibModule) {
 	raylibModule.SetValue("SKYBLUE", ColorToValue(SKYBLUE));
 	raylibModule.SetValue("DARKBLUE", ColorToValue(DARKBLUE));
 
-	// Add keyboard key constants (commonly used keys)
-	raylibModule.SetValue("KEY_SPACE", Value(KEY_SPACE));
-	raylibModule.SetValue("KEY_ESCAPE", Value(KEY_ESCAPE));
-	raylibModule.SetValue("KEY_ENTER", Value(KEY_ENTER));
-	raylibModule.SetValue("KEY_TAB", Value(KEY_TAB));
-	raylibModule.SetValue("KEY_BACKSPACE", Value(KEY_BACKSPACE));
-	raylibModule.SetValue("KEY_RIGHT", Value(KEY_RIGHT));
-	raylibModule.SetValue("KEY_LEFT", Value(KEY_LEFT));
-	raylibModule.SetValue("KEY_DOWN", Value(KEY_DOWN));
-	raylibModule.SetValue("KEY_UP", Value(KEY_UP));
+	// Add keyboard key constants
+	raylibModule.SetValue("KEY_NULL", Value(KEY_NULL));
+
+	// Alphanumeric keys
+	raylibModule.SetValue("KEY_APOSTROPHE", Value(KEY_APOSTROPHE));
+	raylibModule.SetValue("KEY_COMMA", Value(KEY_COMMA));
+	raylibModule.SetValue("KEY_MINUS", Value(KEY_MINUS));
+	raylibModule.SetValue("KEY_PERIOD", Value(KEY_PERIOD));
+	raylibModule.SetValue("KEY_SLASH", Value(KEY_SLASH));
+	raylibModule.SetValue("KEY_ZERO", Value(KEY_ZERO));
+	raylibModule.SetValue("KEY_ONE", Value(KEY_ONE));
+	raylibModule.SetValue("KEY_TWO", Value(KEY_TWO));
+	raylibModule.SetValue("KEY_THREE", Value(KEY_THREE));
+	raylibModule.SetValue("KEY_FOUR", Value(KEY_FOUR));
+	raylibModule.SetValue("KEY_FIVE", Value(KEY_FIVE));
+	raylibModule.SetValue("KEY_SIX", Value(KEY_SIX));
+	raylibModule.SetValue("KEY_SEVEN", Value(KEY_SEVEN));
+	raylibModule.SetValue("KEY_EIGHT", Value(KEY_EIGHT));
+	raylibModule.SetValue("KEY_NINE", Value(KEY_NINE));
+	raylibModule.SetValue("KEY_SEMICOLON", Value(KEY_SEMICOLON));
+	raylibModule.SetValue("KEY_EQUAL", Value(KEY_EQUAL));
 	raylibModule.SetValue("KEY_A", Value(KEY_A));
 	raylibModule.SetValue("KEY_B", Value(KEY_B));
 	raylibModule.SetValue("KEY_C", Value(KEY_C));
@@ -3148,6 +3260,108 @@ static void AddConstants(ValueDict raylibModule) {
 	raylibModule.SetValue("KEY_X", Value(KEY_X));
 	raylibModule.SetValue("KEY_Y", Value(KEY_Y));
 	raylibModule.SetValue("KEY_Z", Value(KEY_Z));
+	raylibModule.SetValue("KEY_LEFT_BRACKET", Value(KEY_LEFT_BRACKET));
+	raylibModule.SetValue("KEY_BACKSLASH", Value(KEY_BACKSLASH));
+	raylibModule.SetValue("KEY_RIGHT_BRACKET", Value(KEY_RIGHT_BRACKET));
+	raylibModule.SetValue("KEY_GRAVE", Value(KEY_GRAVE));
+
+	// Function keys
+	raylibModule.SetValue("KEY_SPACE", Value(KEY_SPACE));
+	raylibModule.SetValue("KEY_ESCAPE", Value(KEY_ESCAPE));
+	raylibModule.SetValue("KEY_ENTER", Value(KEY_ENTER));
+	raylibModule.SetValue("KEY_TAB", Value(KEY_TAB));
+	raylibModule.SetValue("KEY_BACKSPACE", Value(KEY_BACKSPACE));
+	raylibModule.SetValue("KEY_INSERT", Value(KEY_INSERT));
+	raylibModule.SetValue("KEY_DELETE", Value(KEY_DELETE));
+	raylibModule.SetValue("KEY_RIGHT", Value(KEY_RIGHT));
+	raylibModule.SetValue("KEY_LEFT", Value(KEY_LEFT));
+	raylibModule.SetValue("KEY_DOWN", Value(KEY_DOWN));
+	raylibModule.SetValue("KEY_UP", Value(KEY_UP));
+	raylibModule.SetValue("KEY_PAGE_UP", Value(KEY_PAGE_UP));
+	raylibModule.SetValue("KEY_PAGE_DOWN", Value(KEY_PAGE_DOWN));
+	raylibModule.SetValue("KEY_HOME", Value(KEY_HOME));
+	raylibModule.SetValue("KEY_END", Value(KEY_END));
+	raylibModule.SetValue("KEY_CAPS_LOCK", Value(KEY_CAPS_LOCK));
+	raylibModule.SetValue("KEY_SCROLL_LOCK", Value(KEY_SCROLL_LOCK));
+	raylibModule.SetValue("KEY_NUM_LOCK", Value(KEY_NUM_LOCK));
+	raylibModule.SetValue("KEY_PRINT_SCREEN", Value(KEY_PRINT_SCREEN));
+	raylibModule.SetValue("KEY_PAUSE", Value(KEY_PAUSE));
+	raylibModule.SetValue("KEY_F1", Value(KEY_F1));
+	raylibModule.SetValue("KEY_F2", Value(KEY_F2));
+	raylibModule.SetValue("KEY_F3", Value(KEY_F3));
+	raylibModule.SetValue("KEY_F4", Value(KEY_F4));
+	raylibModule.SetValue("KEY_F5", Value(KEY_F5));
+	raylibModule.SetValue("KEY_F6", Value(KEY_F6));
+	raylibModule.SetValue("KEY_F7", Value(KEY_F7));
+	raylibModule.SetValue("KEY_F8", Value(KEY_F8));
+	raylibModule.SetValue("KEY_F9", Value(KEY_F9));
+	raylibModule.SetValue("KEY_F10", Value(KEY_F10));
+	raylibModule.SetValue("KEY_F11", Value(KEY_F11));
+	raylibModule.SetValue("KEY_F12", Value(KEY_F12));
+
+	// Modifier keys
+	raylibModule.SetValue("KEY_LEFT_SHIFT", Value(KEY_LEFT_SHIFT));
+	raylibModule.SetValue("KEY_LEFT_CONTROL", Value(KEY_LEFT_CONTROL));
+	raylibModule.SetValue("KEY_LEFT_ALT", Value(KEY_LEFT_ALT));
+	raylibModule.SetValue("KEY_LEFT_SUPER", Value(KEY_LEFT_SUPER));
+	raylibModule.SetValue("KEY_RIGHT_SHIFT", Value(KEY_RIGHT_SHIFT));
+	raylibModule.SetValue("KEY_RIGHT_CONTROL", Value(KEY_RIGHT_CONTROL));
+	raylibModule.SetValue("KEY_RIGHT_ALT", Value(KEY_RIGHT_ALT));
+	raylibModule.SetValue("KEY_RIGHT_SUPER", Value(KEY_RIGHT_SUPER));
+	raylibModule.SetValue("KEY_KB_MENU", Value(KEY_KB_MENU));
+
+	// Keypad keys
+	raylibModule.SetValue("KEY_KP_0", Value(KEY_KP_0));
+	raylibModule.SetValue("KEY_KP_1", Value(KEY_KP_1));
+	raylibModule.SetValue("KEY_KP_2", Value(KEY_KP_2));
+	raylibModule.SetValue("KEY_KP_3", Value(KEY_KP_3));
+	raylibModule.SetValue("KEY_KP_4", Value(KEY_KP_4));
+	raylibModule.SetValue("KEY_KP_5", Value(KEY_KP_5));
+	raylibModule.SetValue("KEY_KP_6", Value(KEY_KP_6));
+	raylibModule.SetValue("KEY_KP_7", Value(KEY_KP_7));
+	raylibModule.SetValue("KEY_KP_8", Value(KEY_KP_8));
+	raylibModule.SetValue("KEY_KP_9", Value(KEY_KP_9));
+	raylibModule.SetValue("KEY_KP_DECIMAL", Value(KEY_KP_DECIMAL));
+	raylibModule.SetValue("KEY_KP_DIVIDE", Value(KEY_KP_DIVIDE));
+	raylibModule.SetValue("KEY_KP_MULTIPLY", Value(KEY_KP_MULTIPLY));
+	raylibModule.SetValue("KEY_KP_SUBTRACT", Value(KEY_KP_SUBTRACT));
+	raylibModule.SetValue("KEY_KP_ADD", Value(KEY_KP_ADD));
+	raylibModule.SetValue("KEY_KP_ENTER", Value(KEY_KP_ENTER));
+	raylibModule.SetValue("KEY_KP_EQUAL", Value(KEY_KP_EQUAL));
+
+	// Android keys
+	raylibModule.SetValue("KEY_BACK", Value(KEY_BACK));
+	raylibModule.SetValue("KEY_MENU", Value(KEY_MENU));
+	raylibModule.SetValue("KEY_VOLUME_UP", Value(KEY_VOLUME_UP));
+	raylibModule.SetValue("KEY_VOLUME_DOWN", Value(KEY_VOLUME_DOWN));
+
+	// Add gamepad button constants
+	raylibModule.SetValue("GAMEPAD_BUTTON_UNKNOWN", Value(GAMEPAD_BUTTON_UNKNOWN));
+	raylibModule.SetValue("GAMEPAD_BUTTON_LEFT_FACE_UP", Value(GAMEPAD_BUTTON_LEFT_FACE_UP));
+	raylibModule.SetValue("GAMEPAD_BUTTON_LEFT_FACE_RIGHT", Value(GAMEPAD_BUTTON_LEFT_FACE_RIGHT));
+	raylibModule.SetValue("GAMEPAD_BUTTON_LEFT_FACE_DOWN", Value(GAMEPAD_BUTTON_LEFT_FACE_DOWN));
+	raylibModule.SetValue("GAMEPAD_BUTTON_LEFT_FACE_LEFT", Value(GAMEPAD_BUTTON_LEFT_FACE_LEFT));
+	raylibModule.SetValue("GAMEPAD_BUTTON_RIGHT_FACE_UP", Value(GAMEPAD_BUTTON_RIGHT_FACE_UP));
+	raylibModule.SetValue("GAMEPAD_BUTTON_RIGHT_FACE_RIGHT", Value(GAMEPAD_BUTTON_RIGHT_FACE_RIGHT));
+	raylibModule.SetValue("GAMEPAD_BUTTON_RIGHT_FACE_DOWN", Value(GAMEPAD_BUTTON_RIGHT_FACE_DOWN));
+	raylibModule.SetValue("GAMEPAD_BUTTON_RIGHT_FACE_LEFT", Value(GAMEPAD_BUTTON_RIGHT_FACE_LEFT));
+	raylibModule.SetValue("GAMEPAD_BUTTON_LEFT_TRIGGER_1", Value(GAMEPAD_BUTTON_LEFT_TRIGGER_1));
+	raylibModule.SetValue("GAMEPAD_BUTTON_LEFT_TRIGGER_2", Value(GAMEPAD_BUTTON_LEFT_TRIGGER_2));
+	raylibModule.SetValue("GAMEPAD_BUTTON_RIGHT_TRIGGER_1", Value(GAMEPAD_BUTTON_RIGHT_TRIGGER_1));
+	raylibModule.SetValue("GAMEPAD_BUTTON_RIGHT_TRIGGER_2", Value(GAMEPAD_BUTTON_RIGHT_TRIGGER_2));
+	raylibModule.SetValue("GAMEPAD_BUTTON_MIDDLE_LEFT", Value(GAMEPAD_BUTTON_MIDDLE_LEFT));
+	raylibModule.SetValue("GAMEPAD_BUTTON_MIDDLE", Value(GAMEPAD_BUTTON_MIDDLE));
+	raylibModule.SetValue("GAMEPAD_BUTTON_MIDDLE_RIGHT", Value(GAMEPAD_BUTTON_MIDDLE_RIGHT));
+	raylibModule.SetValue("GAMEPAD_BUTTON_LEFT_THUMB", Value(GAMEPAD_BUTTON_LEFT_THUMB));
+	raylibModule.SetValue("GAMEPAD_BUTTON_RIGHT_THUMB", Value(GAMEPAD_BUTTON_RIGHT_THUMB));
+
+	// Add gamepad axis constants
+	raylibModule.SetValue("GAMEPAD_AXIS_LEFT_X", Value(GAMEPAD_AXIS_LEFT_X));
+	raylibModule.SetValue("GAMEPAD_AXIS_LEFT_Y", Value(GAMEPAD_AXIS_LEFT_Y));
+	raylibModule.SetValue("GAMEPAD_AXIS_RIGHT_X", Value(GAMEPAD_AXIS_RIGHT_X));
+	raylibModule.SetValue("GAMEPAD_AXIS_RIGHT_Y", Value(GAMEPAD_AXIS_RIGHT_Y));
+	raylibModule.SetValue("GAMEPAD_AXIS_LEFT_TRIGGER", Value(GAMEPAD_AXIS_LEFT_TRIGGER));
+	raylibModule.SetValue("GAMEPAD_AXIS_RIGHT_TRIGGER", Value(GAMEPAD_AXIS_RIGHT_TRIGGER));
 
 	// Add mouse button constants
 	raylibModule.SetValue("MOUSE_BUTTON_LEFT", Value(MOUSE_BUTTON_LEFT));

@@ -141,7 +141,6 @@ static IntrinsicResult intrinsic_import(Context *context, IntrinsicResult partia
 		long fetchId = (long)partialResult.Result().DoubleValue();
 		auto it = activeImportFetches.find(fetchId);
 		if (it == activeImportFetches.end()) {
-			printf("import: Fetch ID %ld not found!\n", fetchId);
 			RuntimeException("import: internal error (fetch not found)").raise();
 		}
 
@@ -206,7 +205,6 @@ static IntrinsicResult intrinsic_import(Context *context, IntrinsicResult partia
 				attr.onerror = import_fetch_completed;
 
 				newData.fetch = emscripten_fetch(&attr, path.c_str());
-				printf("import: First path failed, trying fetch ID %ld for %s\n", newFetchId, path.c_str());
 
 				return IntrinsicResult(Value((double)newFetchId), false);
 			} else {
@@ -220,6 +218,9 @@ static IntrinsicResult intrinsic_import(Context *context, IntrinsicResult partia
 	String libname = context->GetVar("libname").ToString();
 	if (libname.empty()) {
 		RuntimeException("import: libname required").raise();
+	}
+	if (libname.IndexOfB('/') >= 0) {
+		RuntimeException("import: argument must be library name, not path").raise();
 	}
 
 	// Try to find the file - start with assets/
@@ -239,7 +240,6 @@ static IntrinsicResult intrinsic_import(Context *context, IntrinsicResult partia
 	attr.onerror = import_fetch_completed;
 
 	data.fetch = emscripten_fetch(&attr, path.c_str());
-	printf("import: Started fetch ID %ld for %s\n", fetchId, path.c_str());
 
 	// Return the fetch ID as partial result (number type)
 	return IntrinsicResult(Value((double)fetchId), false);

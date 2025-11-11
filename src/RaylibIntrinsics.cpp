@@ -221,19 +221,24 @@ static Value FontToValue(Font font) {
 static Font ValueToFont(Value value) {
 	if (value.type != ValueType::Map) {
 		// Return default font if not a map
+		printf("ValueToFont: value is not a map, returning default font\n");
 		return GetFontDefault();
 	}
 	ValueDict map = value.GetDict();
 	Value handleVal = map.Lookup(String("_handle"), Value::zero);
-	if (handleVal.IntValue() == 0) {
+	long handle = handleVal.IntValue();
+	if (handle == 0) {
 		// If no handle, return default font
+		printf("ValueToFont: handle is 0, returning default font\n");
 		return GetFontDefault();
 	}
-	Font* fontPtr = (Font*)(long)handleVal.IntValue();
+	Font* fontPtr = (Font*)handle;
 	if (fontPtr == nullptr) {
+		printf("ValueToFont: fontPtr is null, returning default font\n");
 		return GetFontDefault();
 	}
-	return *fontPtr;
+	Font font = *fontPtr;
+	return font;
 }
 
 // Convert a Raylib Wave to a MiniScript map
@@ -616,7 +621,6 @@ static void AddRTexturesMethods(ValueDict raylibModule) {
 			attr.onerror = fetch_completed;
 
 			data.fetch = emscripten_fetch(&attr, path.c_str());
-			printf("LoadTexture: Started fetch ID %ld for %s\n", fetchId, path.c_str());
 
 			// Return the fetch ID as partial result
 			return IntrinsicResult(Value((double)fetchId), false);
@@ -625,7 +629,6 @@ static void AddRTexturesMethods(ValueDict raylibModule) {
 			long fetchId = (long)partialResult.Result().DoubleValue();
 			auto it = activeFetches.find(fetchId);
 			if (it == activeFetches.end()) {
-				printf("LoadTexture: Fetch ID %ld not found!\n", fetchId);
 				return IntrinsicResult::Null;
 			}
 
@@ -638,7 +641,6 @@ static void AddRTexturesMethods(ValueDict raylibModule) {
 
 			// Fetch is complete
 			emscripten_fetch_t* fetch = data.fetch;
-			printf("LoadTexture: Fetch ID %ld complete, status=%d for %s\n", fetchId, data.status, fetch->url);
 
 			if (data.status == 200) {
 				// Success - load image from memory then create texture
@@ -646,27 +648,21 @@ static void AddRTexturesMethods(ValueDict raylibModule) {
 				const char* ext = strrchr(url, '.');
 				if (ext == nullptr) ext = ".png";
 
-				printf("LoadTexture: Fetched %llu bytes from %s, ext=%s\n", fetch->numBytes, url, ext);
-
 				Image img = LoadImageFromMemory(ext, (const unsigned char*)fetch->data, (int)fetch->numBytes);
-				printf("LoadTexture: Image loaded: %dx%d, data=%p\n", img.width, img.height, img.data);
 
 				if (img.data == nullptr) {
-					printf("LoadTexture: Failed to load image from memory\n");
 					emscripten_fetch_close(fetch);
 					activeFetches.erase(it);
 					return IntrinsicResult::Null;
 				}
 
 				Texture tex = LoadTextureFromImage(img);
-				printf("LoadTexture: Texture created: id=%u, %dx%d\n", tex.id, tex.width, tex.height);
 				UnloadImage(img);  // Don't need the CPU image anymore
 				emscripten_fetch_close(fetch);
 				activeFetches.erase(it);
 				return IntrinsicResult(TextureToValue(tex));
 			} else {
 				// Error
-				printf("LoadTexture: Fetch failed with status %d for %s\n", data.status, fetch->url);
 				emscripten_fetch_close(fetch);
 				activeFetches.erase(it);
 				return IntrinsicResult::Null;
@@ -1335,7 +1331,16 @@ static void AddRTextMethods(ValueDict raylibModule) {
 				const char* ext = strrchr(url, '.');
 				if (ext == nullptr) ext = ".ttf";
 
-				Font font = LoadFontFromMemory(ext, (const unsigned char*)fetch->data, (int)fetch->numBytes, 32, nullptr, 0);
+				printf("LoadFont: url=%s, ext=%s\n", url, ext);
+
+				// For BDF (bitmap) fonts, use 0 to load at native size
+				// For scalable fonts (TTF/OTF), use 32 as default
+				int fontSize = (strcmp(ext, ".bdf") == 0) ? 0 : 32;
+
+				printf("LoadFont: Loading with fontSize=%d, numBytes=%d\n", fontSize, (int)fetch->numBytes);
+				Font font = LoadFontFromMemory(ext, (const unsigned char*)fetch->data, (int)fetch->numBytes, fontSize, nullptr, 0);
+				printf("LoadFont: After load - baseSize=%d, glyphCount=%d, texture.id=%d\n",
+				       font.baseSize, font.glyphCount, font.texture.id);
 				emscripten_fetch_close(fetch);
 				activeFetches.erase(it);
 				return IntrinsicResult(FontToValue(font));
@@ -1424,11 +1429,26 @@ static void AddRTextMethods(ValueDict raylibModule) {
 	i->code = INTRINSIC_LAMBDA {
 		Image image = ValueToImage(context->GetVar(String("image")));
 		Color key = ValueToColor(context->GetVar(String("key")));
-		int firstChar = context->GetVar(String("firstChar")).IntValue();
+		Value firstCharVal = context->GetVar(String("firstChar"));
+		int firstChar;
+		if (firstCharVal.type == ValueType::String) {
+			String s = firstCharVal.ToString();
+			firstChar = s.empty() ? 32 : (int)s[0];
+		} else {
+			firstChar = firstCharVal.IntValue();
+		}
 		Font font = LoadFontFromImage(image, key, firstChar);
 		return IntrinsicResult(FontToValue(font));
 	};
 	raylibModule.SetValue("LoadFontFromImage", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("font");
+	i->code = INTRINSIC_LAMBDA {
+		Font font = ValueToFont(context->GetVar(String("font")));
+		return IntrinsicResult(IsFontValid(font));
+	};
+	raylibModule.SetValue("IsFontValid", i->GetFunc());
 
 	i = Intrinsic::Create("");
 	i->AddParam("font");

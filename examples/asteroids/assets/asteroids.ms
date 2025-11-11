@@ -4,9 +4,23 @@ import "Sprite"
 
 spriteSheetTex = raylib.LoadTexture("assets/Asteroids-2X.png")
 
+print "Loading scoreFont..."
+fontImage = raylib.LoadImage("assets/digits.png")
+scoreFont = raylib.LoadFontFromImage(fontImage, [255, 0, 255], "0")
+raylib.UnloadImage(fontImage)
+print "scoreFont isFontValid: " + raylib.IsFontValid(scoreFont)
+print scoreFont
+
 sprites = []
 
 zeroZero = {"x":0, "y":0}
+score = 0
+
+//----------------------------------------------------------------------
+
+addPoints = function(points)
+	outer.score += points
+end function
 
 //----------------------------------------------------------------------
 
@@ -106,10 +120,10 @@ GameSprite.contains = function(point)
 end function
 
 // Draw the radius circle, for debugging:
-GameSprite.draw = function
-	raylib.DrawCircle self.x, self.y, self.radius, [255, 255, 100, 128]
-	super.draw
-end function
+//GameSprite.draw = function
+//	raylib.DrawCircle self.x, self.y, self.radius, [255, 255, 100, 128]
+//	super.draw
+//end function
 
 //----------------------------------------------------------------------
 
@@ -238,7 +252,7 @@ Enemy.update = function(dt)
 	else
 		for b in Bullet.instances
 			if self.contains(b) then
-				//addPoints self.scoreValue
+				addPoints self.scoreValue
 				self.destroy
 				b.destroy
 			end if
@@ -275,7 +289,7 @@ end function
 Rock.destroy = function
 	super.destroy
 	hit.play 0.7, (self.x - 480)/480, 0.5 + 0.2*self.size
-	//makeDebris self
+	makeDebris self
 	if self.size < 2 then
 		// break into two rocks of the next size down
 		Rock.Make self.size+1, self
@@ -300,6 +314,17 @@ end function
 
 //----------------------------------------------------------------------
 
+makeDebris = function(source)
+	for i in range(10)
+		d = new TimedSprite
+		d.init
+		d.srcRect = [14*32, 9*32, 32, 32]
+		d.x = source.x; d.y = source.y; d.tint = source.tint
+		d.v.x = (rnd-0.5) * 300
+		d.v.y = (rnd-0.5) * 300		
+	end for
+end function
+
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
@@ -323,10 +348,12 @@ render = function
 	raylib.BeginDrawing
 	raylib.ClearBackground raylib.BLACK
 
-	//raylib.DrawTexture spriteSheetTex //, x, y, raylib.WHITE
 	for sp in sprites
 		sp.draw
 	end for
+	
+	scoreStr = ("00000" + score)[-5:]
+	raylib.DrawTextEx scoreFont, scoreStr, [780, 0], scoreFont.baseSize, 2, color.lime
 	
 	raylib.DrawFPS
 	raylib.EndDrawing
@@ -337,6 +364,7 @@ run = function
 	while true
 		update
 		render
+		if raylib.IsKeyPressed(raylib.KEY_ESCAPE) or raylib.IsKeyPressed(raylib.KEY_Q) then break
 		yield
 	end while	
 end function

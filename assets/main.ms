@@ -1,10 +1,16 @@
 // main.ms
 // Simple test script for MSRLWeb
 
+raylib.SetWindowTitle "MSRLWeb Demo"
+
+wumpusImg = raylib.LoadImage("assets/Wumpus.png")
+raylib.SetWindowIcon wumpusImg
+
 print "main.ms running!  Version info:"
 print version
 
-wumpusTex = raylib.LoadTexture("assets/Wumpus.png")
+wumpusTex = raylib.LoadTextureFromImage(wumpusImg)
+raylib.UnloadImage wumpusImg
 woobleSnd = raylib.LoadSound("assets/wooble.wav")
 
 rgb = function(r=0, g=0, b=0, a=255)

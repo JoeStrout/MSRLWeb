@@ -9,6 +9,7 @@
 #include "raylib.h"
 #include "MiniscriptInterpreter.h"
 #include "MiniscriptTypes.h"
+#include <emscripten.h>
 #include <emscripten/fetch.h>
 #include <math.h>
 #include <string.h>
@@ -2913,6 +2914,37 @@ static void AddRShapesMethods(ValueDict raylibModule) {
 // rcore methods
 //--------------------------------------------------------------------------------
 
+// Helper: Set window title
+EM_JS(void, _SetWindowTitle, (const char *title), {
+	const _title = UTF8ToString(title);
+	document.title = _title;
+	document.querySelector("h1").textContent = _title;
+});
+
+// Helper: Set window icon
+// We need to free the buffer after we're done with it so this function won't
+// return until after it's done.
+EM_ASYNC_JS(void, _SetWindowIcon, (unsigned char *data, long size), {
+	await new Promise((resolve, reject)=>{
+		const _data = new Uint8Array(HEAP8.buffer, data, size);
+		const blob = new Blob([_data], {type:"image/png"});
+		const reader = new FileReader();
+		reader.onloadend = () => {
+			const dataURL = reader.result;
+			let link = document.querySelector('link[rel="icon"]');
+			if (link===null) {
+				link = document.createElement("link");
+				link.setAttribute("rel", "icon");
+				document.head.appendChild(link);
+			}
+			link.href = dataURL;
+			resolve();
+		};
+		reader.onerror = reject;
+		reader.readAsDataURL(blob);
+	});
+});
+
 static void AddRCoreMethods(ValueDict raylibModule) {
 	Intrinsic *i;
 
@@ -3229,6 +3261,28 @@ static void AddRCoreMethods(ValueDict raylibModule) {
 		return IntrinsicResult(IsCursorOnScreen());
 	};
 	raylibModule.SetValue("IsCursorOnScreen", i->GetFunc());
+
+	// Set window title/icon
+	i = Intrinsic::Create("");
+	i->AddParam("caption", "MSRLWeb - MiniScript + Raylib");
+	i->code = INTRINSIC_LAMBDA {
+		String caption = context->GetVar(String("caption")).GetString();
+		_SetWindowTitle(caption.c_str());
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetWindowTitle", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("image");
+	i->code = INTRINSIC_LAMBDA {
+		Image image = ValueToImage(context->GetVar(String("image")));
+		int size;
+		unsigned char *data = ExportImageToMemory(image, ".png", &size);
+		_SetWindowIcon(data, size);
+		free(data);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetWindowIcon", i->GetFunc());
 }
 
 static void AddConstants(ValueDict raylibModule) {

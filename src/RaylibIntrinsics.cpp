@@ -1147,93 +1147,10 @@ static void AddRTextMethods(ValueDict raylibModule) {
 	i = Intrinsic::Create("");
 	i->AddParam("fileName");
 	i->code = INTRINSIC_LAMBDA {
-		if (partialResult.Done()) {
-			// First call - start the async fetch
-			String path = context->GetVar(String("fileName")).ToString();
-
-			// Create a new fetch ID and entry
-			long fetchId = nextFetchId++;
-			FetchData& data = activeFetches[fetchId];
-
-			emscripten_fetch_attr_t attr;
-			emscripten_fetch_attr_init(&attr);
-			strcpy(attr.requestMethod, "GET");
-			attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY | EMSCRIPTEN_FETCH_PERSIST_FILE;
-			attr.onsuccess = fetch_completed;
-			attr.onerror = fetch_completed;
-
-			data.fetch = emscripten_fetch(&attr, path.c_str());
-			printf("LoadFont: Started fetch ID %ld for %s\n", fetchId, path.c_str());
-
-			// Return the fetch ID as partial result
-			return IntrinsicResult(Value((double)fetchId), false);
-		} else {
-			// Subsequent calls - check if fetch is complete
-			long fetchId = (long)partialResult.Result().DoubleValue();
-			auto it = activeFetches.find(fetchId);
-			if (it == activeFetches.end()) {
-				printf("LoadFont: Fetch ID %ld not found!\n", fetchId);
-				return IntrinsicResult::Null;
-			}
-
-			FetchData& data = it->second;
-
-			if (!data.completed) {
-				// Still loading
-				return partialResult;
-			}
-
-			// Fetch is complete
-			emscripten_fetch_t* fetch = data.fetch;
-			printf("LoadFont: Fetch ID %ld complete, status=%d for %s\n", fetchId, data.status, fetch->url);
-
-			if (data.status == 200) {
-				// Success - get file extension and load font from memory
-				const char* url = fetch->url;
-				const char* ext = strrchr(url, '.');
-				if (ext == nullptr) ext = ".ttf";
-
-				printf("LoadFont: url=%s, ext=%s\n", url, ext);
-
-				Font font = {0};
-				if (IsFileExtension(fetch->url, ".ttf;.otf;.bdf")) {
-					// For BDF (bitmap) fonts, use 0 to load at native size
-					// For scalable fonts (TTF/OTF), use 32 as default
-					int fontSize = (strcmp(ext, ".bdf") == 0) ? 0 : 32;
-
-					printf("LoadFont: Loading with fontSize=%d, numBytes=%d\n", fontSize, (int)fetch->numBytes);
-					font = LoadFontFromMemory(ext, (const unsigned char*)fetch->data, (int)fetch->numBytes, fontSize, nullptr, 0);
-				} else if (strcmp(ext, ".bmf")==0) {
-					printf("LoadFont: Can't load BMFont font files\n");
-				} else {
-					Image image = LoadImageFromMemory(ext, (const unsigned char*)fetch->data, (int)fetch->numBytes);
-					if (image.data==nullptr) {
-						printf("LoadFont: font failed to load\n");
-					} else {
-						printf("LoadFont: loading XNA-style image font\n");
-						font = LoadFontFromImage(image, MAGENTA, 32); // 32 = <SPACE>
-					}
-					UnloadImage(image);
-				}
-				// raylib LoadFont() does this for us, but we can't use that, so we must do it ourselves
-				if (font.texture.id) {
-					SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);
-					printf("LoadFont: After load - baseSize=%d, glyphCount=%d, texture.id=%d\n",
-					       font.baseSize, font.glyphCount, font.texture.id);
-				} else {
-					printf("LoadFont: load failed, returning default font");
-					font = GetFontDefault();
-				}
-				emscripten_fetch_close(fetch);
-				activeFetches.erase(it);
-				return IntrinsicResult(FontToValue(font));
-			} else {
-				// Error
-				emscripten_fetch_close(fetch);
-				activeFetches.erase(it);
-				return IntrinsicResult::Null;
-			}
-		}
+		String path = context->GetVar(String("fileName")).ToString();
+		Font font = LoadFont(path.c_str());
+		if (!IsFontValid(font)) return IntrinsicResult::Null;
+		return IntrinsicResult(FontToValue(font));
 	};
 	raylibModule.SetValue("LoadFont", i->GetFunc());
 
@@ -2945,6 +2862,18 @@ static void AddRCoreMethods(ValueDict raylibModule) {
 		return IntrinsicResult::Null;
 	};
 	raylibModule.SetValue("SetWindowIcon", i->GetFunc());
+
+	// Load text files
+	i = Intrinsic::Create("");
+	i->AddParam("fileName");
+	i->code = INTRINSIC_LAMBDA {
+		const char *fileName = context->GetVar("fileName").GetString().c_str();
+		char *text = LoadFileText(fileName);
+		String ret(text);
+		UnloadFileText(text);
+		return IntrinsicResult(ret);
+	};
+	raylibModule.SetValue("LoadFileText", i->GetFunc());
 }
 
 static void AddConstants(ValueDict raylibModule) {

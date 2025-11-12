@@ -7,6 +7,7 @@
 
 #include "RaylibIntrinsics.h"
 #include "RaylibTypes.h"
+#include "RawData.h"
 #include "raylib.h"
 #include "MiniscriptInterpreter.h"
 #include "MiniscriptTypes.h"
@@ -385,6 +386,358 @@ void AddRCoreMethods(ValueDict raylibModule) {
 		return IntrinsicResult::Null;
 	};
 	raylibModule.SetValue("SetWindowIcon", i->GetFunc());
+
+	// Screen dimension functions
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetScreenWidth());
+	};
+	raylibModule.SetValue("GetScreenWidth", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetScreenHeight());
+	};
+	raylibModule.SetValue("GetScreenHeight", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetRenderWidth());
+	};
+	raylibModule.SetValue("GetRenderWidth", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetRenderHeight());
+	};
+	raylibModule.SetValue("GetRenderHeight", i->GetFunc());
+
+	// Window state functions
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(IsWindowFocused());
+	};
+	raylibModule.SetValue("IsWindowFocused", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(IsWindowReady());
+	};
+	raylibModule.SetValue("IsWindowReady", i->GetFunc());
+
+	// Additional mouse functions
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		Vector2 wheelMove = GetMouseWheelMoveV();
+		ValueDict wheelMap;
+		wheelMap.SetValue(String("x"), Value(wheelMove.x));
+		wheelMap.SetValue(String("y"), Value(wheelMove.y));
+		return IntrinsicResult(wheelMap);
+	};
+	raylibModule.SetValue("GetMouseWheelMoveV", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("x");
+	i->AddParam("y");
+	i->code = INTRINSIC_LAMBDA {
+		int x = context->GetVar(String("x")).IntValue();
+		int y = context->GetVar(String("y")).IntValue();
+		SetMousePosition(x, y);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetMousePosition", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("offsetX");
+	i->AddParam("offsetY");
+	i->code = INTRINSIC_LAMBDA {
+		int offsetX = context->GetVar(String("offsetX")).IntValue();
+		int offsetY = context->GetVar(String("offsetY")).IntValue();
+		SetMouseOffset(offsetX, offsetY);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetMouseOffset", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("scaleX");
+	i->AddParam("scaleY");
+	i->code = INTRINSIC_LAMBDA {
+		float scaleX = context->GetVar(String("scaleX")).FloatValue();
+		float scaleY = context->GetVar(String("scaleY")).FloatValue();
+		SetMouseScale(scaleX, scaleY);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetMouseScale", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		EnableCursor();
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("EnableCursor", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		DisableCursor();
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("DisableCursor", i->GetFunc());
+
+	// Touch input functions
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetTouchX());
+	};
+	raylibModule.SetValue("GetTouchX", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetTouchY());
+	};
+	raylibModule.SetValue("GetTouchY", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("index", 0);
+	i->code = INTRINSIC_LAMBDA {
+		int index = context->GetVar(String("index")).IntValue();
+		Vector2 pos = GetTouchPosition(index);
+		ValueDict posMap;
+		posMap.SetValue(String("x"), Value(pos.x));
+		posMap.SetValue(String("y"), Value(pos.y));
+		return IntrinsicResult(posMap);
+	};
+	raylibModule.SetValue("GetTouchPosition", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("index", 0);
+	i->code = INTRINSIC_LAMBDA {
+		int index = context->GetVar(String("index")).IntValue();
+		return IntrinsicResult(GetTouchPointId(index));
+	};
+	raylibModule.SetValue("GetTouchPointId", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetTouchPointCount());
+	};
+	raylibModule.SetValue("GetTouchPointCount", i->GetFunc());
+
+	// Gesture functions
+
+	i = Intrinsic::Create("");
+	i->AddParam("flags");
+	i->code = INTRINSIC_LAMBDA {
+		unsigned int flags = (unsigned int)context->GetVar(String("flags")).IntValue();
+		SetGesturesEnabled(flags);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetGesturesEnabled", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("gesture");
+	i->code = INTRINSIC_LAMBDA {
+		int gesture = context->GetVar(String("gesture")).IntValue();
+		return IntrinsicResult(IsGestureDetected(gesture));
+	};
+	raylibModule.SetValue("IsGestureDetected", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetGestureDetected());
+	};
+	raylibModule.SetValue("GetGestureDetected", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetGestureHoldDuration());
+	};
+	raylibModule.SetValue("GetGestureHoldDuration", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		Vector2 dragVector = GetGestureDragVector();
+		ValueDict dragMap;
+		dragMap.SetValue(String("x"), Value(dragVector.x));
+		dragMap.SetValue(String("y"), Value(dragVector.y));
+		return IntrinsicResult(dragMap);
+	};
+	raylibModule.SetValue("GetGestureDragVector", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetGestureDragAngle());
+	};
+	raylibModule.SetValue("GetGestureDragAngle", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		Vector2 pinchVector = GetGesturePinchVector();
+		ValueDict pinchMap;
+		pinchMap.SetValue(String("x"), Value(pinchVector.x));
+		pinchMap.SetValue(String("y"), Value(pinchVector.y));
+		return IntrinsicResult(pinchMap);
+	};
+	raylibModule.SetValue("GetGesturePinchVector", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		return IntrinsicResult(GetGesturePinchAngle());
+	};
+	raylibModule.SetValue("GetGesturePinchAngle", i->GetFunc());
+
+	// 2D rendering mode functions
+
+	i = Intrinsic::Create("");
+	i->AddParam("camera");
+	i->code = INTRINSIC_LAMBDA {
+		ValueDict cameraMap = context->GetVar(String("camera")).GetDict();
+		Camera2D camera;
+		camera.offset.x = cameraMap.Lookup(String("offsetX"), Value::zero).FloatValue();
+		camera.offset.y = cameraMap.Lookup(String("offsetY"), Value::zero).FloatValue();
+		camera.target.x = cameraMap.Lookup(String("targetX"), Value::zero).FloatValue();
+		camera.target.y = cameraMap.Lookup(String("targetY"), Value::zero).FloatValue();
+		camera.rotation = cameraMap.Lookup(String("rotation"), Value::zero).FloatValue();
+		camera.zoom = cameraMap.Lookup(String("zoom"), Value::one).FloatValue();
+		BeginMode2D(camera);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("BeginMode2D", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		EndMode2D();
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("EndMode2D", i->GetFunc());
+
+	// Blend mode functions
+
+	i = Intrinsic::Create("");
+	i->AddParam("mode");
+	i->code = INTRINSIC_LAMBDA {
+		int mode = context->GetVar(String("mode")).IntValue();
+		BeginBlendMode(mode);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("BeginBlendMode", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		EndBlendMode();
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("EndBlendMode", i->GetFunc());
+
+	// Scissor mode functions
+
+	i = Intrinsic::Create("");
+	i->AddParam("x");
+	i->AddParam("y");
+	i->AddParam("width");
+	i->AddParam("height");
+	i->code = INTRINSIC_LAMBDA {
+		int x = context->GetVar(String("x")).IntValue();
+		int y = context->GetVar(String("y")).IntValue();
+		int width = context->GetVar(String("width")).IntValue();
+		int height = context->GetVar(String("height")).IntValue();
+		BeginScissorMode(x, y, width, height);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("BeginScissorMode", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->code = INTRINSIC_LAMBDA {
+		EndScissorMode();
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("EndScissorMode", i->GetFunc());
+
+	// Utility functions
+
+	i = Intrinsic::Create("");
+	i->AddParam("url");
+	i->code = INTRINSIC_LAMBDA {
+		String url = context->GetVar(String("url")).ToString();
+		OpenURL(url.c_str());
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("OpenURL", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("text");
+	i->code = INTRINSIC_LAMBDA {
+		String text = context->GetVar(String("text")).ToString();
+		SetClipboardText(text.c_str());
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetClipboardText", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("fileName");
+	i->AddParam("ext");
+	i->code = INTRINSIC_LAMBDA {
+		String fileName = context->GetVar(String("fileName")).ToString();
+		String ext = context->GetVar(String("ext")).ToString();
+		return IntrinsicResult(IsFileExtension(fileName.c_str(), ext.c_str()));
+	};
+	raylibModule.SetValue("IsFileExtension", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("fileName");
+	i->code = INTRINSIC_LAMBDA {
+		String fileName = context->GetVar(String("fileName")).ToString();
+		TakeScreenshot(fileName.c_str());
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("TakeScreenshot", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("data");
+	i->AddParam("dataSize");
+	i->code = INTRINSIC_LAMBDA {
+		// Get the data - could be a string or RawData
+		Value dataVal = context->GetVar(String("data"));
+		int dataSize = context->GetVar(String("dataSize")).IntValue();
+
+		const unsigned char* bytes = nullptr;
+		String tempStr;
+
+		if (dataVal.type == ValueType::String) {
+			tempStr = dataVal.ToString();
+			bytes = (const unsigned char*)tempStr.c_str();
+			if (dataSize <= 0) dataSize = tempStr.LengthB();
+		} else if (dataVal.type == ValueType::Map) {
+			BinaryData* rawData = ValueToRawData(dataVal);
+			if (rawData != nullptr) {
+				bytes = rawData->bytes;
+				if (dataSize <= 0) dataSize = rawData->length;
+			}
+		}
+
+		if (bytes == nullptr || dataSize <= 0) {
+			return IntrinsicResult(String());
+		}
+
+		int outputSize = 0;
+		char* encoded = EncodeDataBase64(bytes, dataSize, &outputSize);
+		String result(encoded);
+		free(encoded);
+		return IntrinsicResult(result);
+	};
+	raylibModule.SetValue("EncodeDataBase64", i->GetFunc());
+
+	i = Intrinsic::Create("");
+	i->AddParam("seconds", 1.0);
+	i->code = INTRINSIC_LAMBDA {
+		double seconds = context->GetVar(String("seconds")).DoubleValue();
+		WaitTime(seconds);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("WaitTime", i->GetFunc());
 
 	// Load text files
 	i = Intrinsic::Create("");

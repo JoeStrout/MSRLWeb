@@ -7,6 +7,7 @@
 #include "MiniscriptIntrinsics.h"
 #include "MiniscriptParser.h"
 #include "RaylibIntrinsics.h"
+#include "loadfile.h"
 #include <emscripten/emscripten.h>
 #include <emscripten/fetch.h>
 #include <stdio.h>
@@ -379,6 +380,7 @@ int main() {
 	InitWindow(screenWidth, screenHeight, "MSRLWeb - MiniScript + Raylib");
 	SetTargetFPS(60);
 	InitAudioDevice();
+	InstallLoadFileHooks();
 
 	// Set default font to use point filtering for pixel-perfect rendering
 // 	Font defaultFont = GetFontDefault();

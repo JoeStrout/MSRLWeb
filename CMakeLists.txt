@@ -39,6 +39,7 @@ endif()
 # Create executable
 add_executable(msrlweb
     src/main.cpp
+    src/loadfile.cpp
     src/RaylibIntrinsics.cpp
     ${MINISCRIPT_SOURCES}
 )
@@ -66,6 +67,7 @@ set(EMSCRIPTEN_LINK_FLAGS
     -sTOTAL_MEMORY=67108864               # Initial memory (64MB)
     -sSTACK_SIZE=5242880                  # Stack size (5MB)
     -fexceptions                          # Enable C++ exceptions
+    -sEXPORTED_FUNCTIONS=['_main','_malloc'] # Enable malloc from JavaScript
     --pre-js ${CMAKE_SOURCE_DIR}/prevent-defaults.js  # Prevent browser defaults for game keys
 )
 

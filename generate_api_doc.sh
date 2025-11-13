@@ -1,50 +1,46 @@
 #!/bin/bash
 
-# Generate API documentation from RaylibIntrinsics.cpp
+# Generate API documentation from Raylib module files
 # Outputs a markdown file with a table of all wrapped functions by module
 
-INPUT_FILE="src/RaylibIntrinsics.cpp"
 OUTPUT_FILE="RAYLIB_API.md"
 
 echo "# MSRLWeb Raylib API Reference" > "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 echo "This document lists all Raylib functions available in MSRLWeb, organized by module." >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
-echo "Generated from: $INPUT_FILE" >> "$OUTPUT_FILE"
+echo "Generated from: src/R*.cpp module files" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
-# Extract functions for each module
+# Extract functions from a module's source file
 extract_functions() {
-    local module_name=$1
-    local start_pattern=$2
+    local file_path=$1
 
-    # Find all SetValue calls between the start pattern and the next "}" at column 1
+    # Find all SetValue calls in the file
     awk '
-        /^static void '"$start_pattern"'\(/ { in_section=1; next }
-        in_section && /^}$/ { in_section=0 }
-        in_section && /raylibModule\.SetValue\("/ {
+        /raylibModule\.SetValue\("/ {
             match($0, /"([^"]+)"/)
             fname = substr($0, RSTART+1, RLENGTH-2)
             if (fname != "") print fname
         }
-    ' "$INPUT_FILE" | sort
+    ' "$file_path" | sort
 }
 
-# Extract functions for each module
+# Extract functions for each module from their respective files
 echo "Extracting rcore functions..."
-RCORE_FUNCS=($(extract_functions "rcore" "AddRCoreMethods"))
+RCORE_FUNCS=($(extract_functions "src/RCore.cpp"))
 
 echo "Extracting rshapes functions..."
-RSHAPES_FUNCS=($(extract_functions "rshapes" "AddRShapesMethods"))
+RSHAPES_FUNCS=($(extract_functions "src/RShapes.cpp"))
 
 echo "Extracting rtextures functions..."
-RTEXTURES_FUNCS=($(extract_functions "rtextures" "AddRTexturesMethods"))
+RTEXTURES_FUNCS=($(extract_functions "src/RTextures.cpp"))
 
 echo "Extracting rtext functions..."
-RTEXT_FUNCS=($(extract_functions "rtext" "AddRTextMethods"))
+RTEXT_FUNCS=($(extract_functions "src/RText.cpp"))
 
 echo "Extracting raudio functions..."
-RAUDIO_FUNCS=($(extract_functions "raudio" "AddRAudioMethods"))
+RAUDIO_FUNCS=($(extract_functions "src/RAudio.cpp"))
 
 # Get the maximum count to know how many rows we need
 MAX_COUNT=${#RCORE_FUNCS[@]}

@@ -750,4 +750,14 @@ void AddRCoreMethods(ValueDict raylibModule) {
 		return IntrinsicResult(ret);
 	};
 	raylibModule.SetValue("LoadFileText", i->GetFunc());
+
+	// Logging and tracing
+	i = Intrinsic::Create("");
+	i->AddParam("logLevel");
+	i->code = INTRINSIC_LAMBDA {
+		int logLevel = context->GetVar(String("logLevel")).IntValue();
+		SetTraceLogLevel(logLevel);
+		return IntrinsicResult::Null;
+	};
+	raylibModule.SetValue("SetTraceLogLevel", i->GetFunc());
 }

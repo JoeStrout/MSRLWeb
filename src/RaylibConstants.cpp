@@ -211,4 +211,14 @@ void AddConstants(ValueDict raylibModule) {
 	raylibModule.SetValue("TEXTURE_WRAP_CLAMP", Value(TEXTURE_WRAP_CLAMP));
 	raylibModule.SetValue("TEXTURE_WRAP_MIRROR_REPEAT", Value(TEXTURE_WRAP_MIRROR_REPEAT));
 	raylibModule.SetValue("TEXTURE_WRAP_MIRROR_CLAMP", Value(TEXTURE_WRAP_MIRROR_CLAMP));
+
+	// Add trace log level constants
+	raylibModule.SetValue("LOG_ALL", Value(LOG_ALL));
+	raylibModule.SetValue("LOG_TRACE", Value(LOG_TRACE));
+	raylibModule.SetValue("LOG_DEBUG", Value(LOG_DEBUG));
+	raylibModule.SetValue("LOG_INFO", Value(LOG_INFO));
+	raylibModule.SetValue("LOG_WARNING", Value(LOG_WARNING));
+	raylibModule.SetValue("LOG_ERROR", Value(LOG_ERROR));
+	raylibModule.SetValue("LOG_FATAL", Value(LOG_FATAL));
+	raylibModule.SetValue("LOG_NONE", Value(LOG_NONE));
 }

@@ -6,12 +6,12 @@ Generated from: src/R*.cpp module files
 
 ## Summary
 
-- **rcore**: 80 functions
+- **rcore**: 81 functions
 - **rshapes**: 61 functions
 - **rtextures**: 114 functions
 - **rtext**: 35 functions
 - **raudio**: 58 functions
-- **Total**: 348 functions
+- **Total**: 349 functions
 
 ## Functions by Module
 
@@ -92,12 +92,12 @@ Generated from: src/R*.cpp module files
 | SetMousePosition |  | ImageFlipHorizontal |  |  |
 | SetMouseScale |  | ImageFlipVertical |  |  |
 | SetTargetFPS |  | ImageFormat |  |  |
-| SetWindowIcon |  | ImageFromChannel |  |  |
-| SetWindowTitle |  | ImageFromImage |  |  |
-| ShowCursor |  | ImageKernelConvolution |  |  |
-| TakeScreenshot |  | ImageMipmaps |  |  |
-| WaitTime |  | ImageResize |  |  |
-|  |  | ImageResizeCanvas |  |  |
+| SetTraceLogLevel |  | ImageFromChannel |  |  |
+| SetWindowIcon |  | ImageFromImage |  |  |
+| SetWindowTitle |  | ImageKernelConvolution |  |  |
+| ShowCursor |  | ImageMipmaps |  |  |
+| TakeScreenshot |  | ImageResize |  |  |
+| WaitTime |  | ImageResizeCanvas |  |  |
 |  |  | ImageResizeNN |  |  |
 |  |  | ImageRotate |  |  |
 |  |  | ImageRotateCCW |  |  |
@@ -134,4 +134,4 @@ Generated from: src/R*.cpp module files
 
 ---
 
-*Generated on Thu Nov 13 08:23:17 MST 2025*
+*Generated on Thu Nov 13 09:27:39 MST 2025*

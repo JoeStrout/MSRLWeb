@@ -1,68 +1,168 @@
-// main.ms
-// Simple test script for MSRLWeb
+// MSRLWeb examples -- main program.
+//
+// This draws a simple menu of buttons, each leading to another example.
 
-raylib.SetWindowTitle "MSRLWeb Demo"
+print "Running main.ms"
 
-wumpusImg = raylib.LoadImage("assets/Wumpus.png")
-raylib.SetWindowIcon wumpusImg
+rl = raylib  // (just to shorten the subsequent code)
+rl.SetTraceLogLevel(rl.LOG_WARNING)
 
-print "main.ms running!  Version info:"
-print version
+mouseCaughtBy = null // Button or other UI element currently handling mouse press
 
-wumpusTex = raylib.LoadTextureFromImage(wumpusImg)
-raylib.UnloadImage wumpusImg
-woobleSnd = raylib.LoadSound("assets/wooble.wav")
+Button = {}
+Button.left = 0
+Button.top = 0
+Button.width = 200
+Button.height = 40
+Button.caption = "Button"
+Button.texture = null
+Button.right = function; return self.left + self.width; end function
+Button.bottom = function; return self.top + self.height; end function
+Button.centerX = function; return self.left + self.width/2; end function
+Button.centerY = function; return self.top + self.height/2; end function
+Button.hovered = false
+Button.pressed = false
+Button.action = null
 
-rgb = function(r=0, g=0, b=0, a=255)
-	return {"r":r, "g":g, "b":b, "a":a}
+Button.contains = function(x, y)
+	return self.left <= x <= self.right and self.top <= y <= self.bottom
 end function
 
-drawBackground = function
-	// Sunset sky gradient
-	raylib.DrawRectangleGradientV 0, 0, 960, 640, rgb(200, 200, 255), rgb(150, 0, 0)
-
-	// Sun
-	raylib.DrawCircle 800, 300, 60, rgb(255, 200, 0, 255)
-	raylib.DrawCircle 800, 300, 50, raylib.YELLOW
-
-	// Mountains (note: we have one clockwise and one anti-clockwise
-	// here, just to prove that in MSRL, it works both ways!)
-	raylib.DrawTriangle [50, 640], [500, 640], [300, 400], rgb(60, 40, 80, 255)
-	raylib.DrawTriangle [400, 640], [600, 350], [900, 640], rgb(80, 50, 100, 255)
+Button.containsMouse = function
+	return self.contains(rl.GetMouseX, rl.GetMouseY)
 end function
 
-
-x = 100; y = 100
-dx = 10; dy = 10
-
-print "Move with arrow keys, or click with the mouse."
-while true
-	raylib.BeginDrawing
-	raylib.ClearBackground
+Button.updateTexture = function
+	if self.texture then rl.UnloadTexture(self.texture)
 	
-	drawBackground
-	raylib.DrawTexture wumpusTex, x, y, raylib.WHITE
-
-	if raylib.IsKeyDown(raylib.KEY_LEFT) then x -= dx
-	if raylib.IsKeyDown(raylib.KEY_RIGHT) then x += dx
-	if raylib.IsKeyDown(raylib.KEY_UP) then y -= dy
-	if raylib.IsKeyDown(raylib.KEY_DOWN) then y += dy
-
-	if raylib.IsMouseButtonPressed(raylib.MOUSE_BUTTON_LEFT) then
-		pos = raylib.GetMousePosition
-		print "Clicked at " + pos.x + ", " + pos.y
-		x = pos.x
-		y = pos.y
-		raylib.SetSoundPitch woobleSnd, 1 - (pos.y - 320) / 640
-		raylib.SetSoundPan woobleSnd, 1 - pos.x / 960  // NOTE: 0=right, 1=left
-		raylib.PlaySound woobleSnd
+	borderColor = rl.SKYBLUE
+	fillColor = rl.BLUE
+	textColor = rl.RAYWHITE
+	if self.pressed then
+		borderColor = rl.ColorLerp(borderColor, rl.BLACK, 0.1)
+		fillColor = rl.ColorLerp(fillColor, rl.BLACK, 0.1)
+		textColor = rl.YELLOW
+	else if self.hovered then
+		borderColor = rl.ColorLerp(borderColor, rl.WHITE, 0.25)
+		fillColor = rl.ColorLerp(fillColor, rl.WHITE, 0.25)
+		textColor = rl.YELLOW
 	end if
+	fontSize = 20
 	
-	raylib.DrawFPS
-	raylib.EndDrawing
-	yield
-end while
+	img = rl.GenImageColor(self.width, self.height)
+	rl.ImageDrawRectangleRec img, [0, 0, self.width, self.height], borderColor
+	rl.ImageDrawRectangleRec img, [1, 1, self.width-2, self.height-2], fillColor
 
-// clean up (not that we ever get here...)
-raylib.UnloadTexture tex
-raylib.UnloadSound woobleSnd
+	textWidth = rl.MeasureText(self.caption, fontSize)
+	textX = (self.width - textWidth) / 2
+	textY = (self.height - fontSize) / 2
+	rl.ImageDrawText img, self.caption, textX, textY, fontSize, textColor
+
+	self.texture = rl.LoadTextureFromImage(img)
+	rl.UnloadImage img	
+end function
+
+Button.handleMouseDown = function
+	self.pressed = true
+	self.updateTexture
+end function
+
+Button.handleMouseDrag = function
+	nowPressed = self.containsMouse
+	if nowPressed != self.hovered then
+		self.pressed = nowPressed
+		self.hovered = nowPressed
+		self.updateTexture
+	end if
+end function
+
+Button.handleMouseUp = function
+	if not self.pressed then return
+	print self.caption + " clicked!"
+	self.pressed = false
+	self.updateTexture
+	self.action
+end function
+
+Button.update = function
+	if mouseCaughtBy then return	
+	nowHover = self.containsMouse
+	if nowHover != self.hovered then
+		self.hovered = nowHover
+		self.updateTexture
+	end if
+end function
+
+Button.render = function
+	rl.DrawTexture self.texture, self.left, self.top + 2 * self.pressed
+end function
+
+Button.Make = function(caption, centerX, centerY, width, height)
+	btn = new Button
+	if width != null then btn.width = width
+	if height != null then btn.height = height
+	btn.left = centerX - btn.width/2
+	btn.top = centerY - btn.height/2
+	btn.caption = caption
+	btn.updateTexture
+	return btn
+end function
+
+updateMouse = function
+	if mouseCaughtBy then
+		if rl.IsMouseButtonDown then
+			mouseCaughtBy.handleMouseDrag
+		else
+			mouseCaughtBy.handleMouseUp
+			globals.mouseCaughtBy = null
+		end if
+	else if rl.IsMouseButtonDown then
+		for btn in buttons
+			if btn.containsMouse then
+				globals.mouseCaughtBy = btn
+				btn.handleMouseDown
+				break
+			end if
+		end for
+	end if
+end function			
+
+// Create a button for each example
+buttons = []
+x = 480; y = 100
+dy = 80
+
+btn = Button.Make("Basic", x, y)
+btn.action = function
+	import "basic"
+	basic.run
+end function
+buttons.push btn
+y += dy
+
+btn = Button.Make("Asteroids", x, y)
+btn.action = function
+	import "asteroids"
+	asteroids.run
+end function
+buttons.push btn
+y += dy
+
+// Main loop
+while true
+	// update stuff
+	updateMouse
+	for btn in buttons
+		btn.update
+	end for	
+	
+	// render stuff
+	rl.BeginDrawing
+	rl.ClearBackground rl.BLACK	
+	for btn in buttons
+		btn.render
+	end for
+	rl.DrawFPS
+	rl.DrawText str(rl.IsMouseButtonDown), 10, 30, 20, rl.BLUE
+	rl.EndDrawing
+end while

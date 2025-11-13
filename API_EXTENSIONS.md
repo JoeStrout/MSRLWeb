@@ -4,6 +4,7 @@ This document describes features in MSRLWeb that extend or differ from the stand
 
 ## Table of Contents
 - [Default Parameters](#default-parameters)
+- [Flexible Parameter Formats](#flexible-paramater-formats)
 - [Codepoints Parameter Enhancement](#codepoints-parameter-enhancement)
 - [MiniScript-Specific Classes](#miniscript-specific-classes)
 
@@ -40,6 +41,82 @@ raylib.DrawTextPro(font, "Rotated", {x: 200, y: 100}, null, 45)  // Rotated 45 d
 raylib.LoadFontEx("myfont.ttf")  // Loads all glyphs at size 20
 raylib.LoadFontEx("myfont.ttf", 32)  // Loads all glyphs at size 32
 raylib.LoadFontEx("myfont.ttf", 32, "ABC")  // Loads only A, B, C at size 32
+```
+
+---
+
+## Flexible Parameter Formats
+
+### Color Parameters
+
+Any function accepting a **Color** parameter can receive the color in multiple formats:
+
+**1. Map format (recommended):**
+```miniscript
+color = {"r": 255, "g": 100, "b": 50, "a": 255}
+raylib.ClearBackground(color)
+
+// You can omit alpha, it defaults to 255
+raylib.DrawText("Hello", 10, 10, 20, {"r": 0, "g": 0, "b": 0})
+```
+
+**2. List format:**
+```miniscript
+color = [255, 100, 50, 255]  // [r, g, b, a]
+raylib.ClearBackground(color)
+
+// You can omit alpha, it defaults to 255
+raylib.DrawText("Hello", 10, 10, 20, [0, 0, 0])
+```
+
+**3. Using built-in color constants:**
+```miniscript
+raylib.ClearBackground(raylib.RAYWHITE)
+raylib.DrawText("Hello", 10, 10, 20, raylib.BLACK)
+```
+
+
+### Vector2 Parameters
+
+Functions accepting **Vector2** (like positions) accept:
+
+**1. Map format:**
+```miniscript
+position = {"x": 100, "y": 200}
+raylib.DrawTextEx(font, "Text", position, 20, 2, raylib.BLACK)
+```
+
+**2. List format:**
+```miniscript
+position = [100, 200]  // [x, y]
+raylib.DrawTextEx(font, "Text", position, 20, 2, raylib.BLACK)
+```
+
+### Rectangle Parameters
+
+Functions accepting **Rectangle** accept:
+
+**1. Map format:**
+```miniscript
+rect = {"x": 100, "y": 100, "width": 200, "height": 50}
+raylib.DrawRectangleRec(rect, raylib.RED)
+```
+
+**2. List format:**
+```miniscript
+rect = [100, 100, 200, 50]  // [x, y, width, height]
+raylib.DrawRectangleRec(rect, raylib.RED)
+```
+
+**Examples combining formats:**
+```miniscript
+// Drawing a button-like rectangle
+btnRect = {"x": 340, "y": 250, "width": 120, "height": 40}
+btnColor = {"r": 100, "g": 150, "b": 200, "a": 255}
+textColor = [255, 255, 255]  // White as list
+
+raylib.DrawRectangleRec(btnRect, btnColor)
+raylib.DrawText("Click Me", 355, 262, 16, textColor)
 ```
 
 ---

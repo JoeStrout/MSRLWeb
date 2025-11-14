@@ -472,8 +472,13 @@ void AddRTextMethods(ValueDict raylibModule) {
 		int codepointCount = 0;
 		int* codepoints = GetCodepointsFromValue(codepointsVal, &codepointCount);
 
+#if RAYLIB_VERSION_MAJOR>5 || RAYLIB_VERSION_MINOR>5
 		int glyphCount = 0;
 		GlyphInfo* glyphs = LoadFontData(data->bytes, data->length, fontSize, codepoints, codepointCount, type, &glyphCount);
+#else
+		int glyphCount = codepointCount;
+		GlyphInfo* glyphs = LoadFontData(data->bytes, data->length, fontSize, codepoints, codepointCount, type);
+#endif /* RAYLIB_VERSION_MAJOR>5 || RAYLIB_VERSION_MINOR>5 */
 
 		if (codepoints) delete[] codepoints;
 

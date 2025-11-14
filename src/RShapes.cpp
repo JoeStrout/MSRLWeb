@@ -699,6 +699,7 @@ void AddRShapesMethods(ValueDict raylibModule) {
 	};
 	raylibModule.SetValue("DrawCircleSectorLines", i->GetFunc());
 
+#if RAYLIB_VERSION_MAJOR>5 || RAYLIB_VERSION_MINOR>5
 	// Additional ellipse drawing
 
 	i = Intrinsic::Create("");
@@ -730,6 +731,7 @@ void AddRShapesMethods(ValueDict raylibModule) {
 		return IntrinsicResult::Null;
 	};
 	raylibModule.SetValue("DrawEllipseLinesV", i->GetFunc());
+#endif /* RAYLIB_VERSION_MAJOR>5 || RAYLIB_VERSION_MINOR>5 */
 
 	// Additional line drawing
 

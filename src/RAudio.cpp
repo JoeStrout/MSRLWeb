@@ -11,11 +11,9 @@
 #include "raylib.h"
 #include "MiniscriptInterpreter.h"
 #include "MiniscriptTypes.h"
+#include "macros.h"
 
 using namespace MiniScript;
-
-// Macro to reduce boilerplate for lambda intrinsics
-#define INTRINSIC_LAMBDA [](Context *context, IntrinsicResult partialResult) -> IntrinsicResult
 
 void AddRAudioMethods(ValueDict raylibModule) {
 	Intrinsic *i;

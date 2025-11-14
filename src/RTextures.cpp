@@ -11,10 +11,9 @@
 #include "raylib.h"
 #include "MiniscriptInterpreter.h"
 #include "MiniscriptTypes.h"
+#include "macros.h"
 
 using namespace MiniScript;
-
-#define INTRINSIC_LAMBDA [](Context *context, IntrinsicResult partialResult) -> IntrinsicResult
 
 void AddRTexturesMethods(ValueDict raylibModule) {
 	Intrinsic *i;

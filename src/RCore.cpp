@@ -12,10 +12,9 @@
 #include "MiniscriptInterpreter.h"
 #include "MiniscriptTypes.h"
 #include <emscripten.h>
+#include "macros.h"
 
 using namespace MiniScript;
-
-#define INTRINSIC_LAMBDA [](Context *context, IntrinsicResult partialResult) -> IntrinsicResult
 
 // Helper: Set window title
 EM_JS(void, _SetWindowTitle, (const char *title), {

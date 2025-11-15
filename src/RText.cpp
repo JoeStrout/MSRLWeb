@@ -12,10 +12,9 @@
 #include "MiniscriptInterpreter.h"
 #include "MiniscriptTypes.h"
 #include "UnicodeUtil.h"
+#include "macros.h"
 
 using namespace MiniScript;
-
-#define INTRINSIC_LAMBDA [](Context *context, IntrinsicResult partialResult) -> IntrinsicResult
 
 // Helper function to extract codepoints from either a list of ints or a UTF-8 string
 // Returns allocated int array of codepoints, or nullptr if value is null
@@ -69,6 +68,11 @@ static int* GetCodepointsFromValue(Value value, int* codepointCount) {
 
 	return nullptr;
 }
+
+// A little hack to fix compilation errors (make minerobber remove this when 5.6 comes out)
+#if !RAYLIB_VERSION_GT(5,5)
+const char *TextJoin(char **parts, int count, const char *delimiter) { return TextJoin((const char**)parts, count, delimiter); };
+#endif /* !RAYLIB_VERSION_GT(5,5) */
 
 void AddRTextMethods(ValueDict raylibModule) {
 	Intrinsic *i;
@@ -472,13 +476,13 @@ void AddRTextMethods(ValueDict raylibModule) {
 		int codepointCount = 0;
 		int* codepoints = GetCodepointsFromValue(codepointsVal, &codepointCount);
 
-#if RAYLIB_VERSION_MAJOR>5 || RAYLIB_VERSION_MINOR>5
+#if RAYLIB_VERSION_GT(5, 5)
 		int glyphCount = 0;
 		GlyphInfo* glyphs = LoadFontData(data->bytes, data->length, fontSize, codepoints, codepointCount, type, &glyphCount);
 #else
 		int glyphCount = codepointCount;
 		GlyphInfo* glyphs = LoadFontData(data->bytes, data->length, fontSize, codepoints, codepointCount, type);
-#endif /* RAYLIB_VERSION_MAJOR>5 || RAYLIB_VERSION_MINOR>5 */
+#endif /* RAYLIB_VERSION_GT(5, 5) */
 
 		if (codepoints) delete[] codepoints;
 
@@ -694,6 +698,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 	};
 	raylibModule.SetValue("TextFindIndex", i->GetFunc());
 
+#if RAYLIB_VERSION_GT(5, 5)
 	i = Intrinsic::Create("");
 	i->AddParam("text");
 	i->AddParam("begin");
@@ -708,6 +713,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 		return IntrinsicResult(ret);
 	};
 	raylibModule.SetValue("GetTextBetween", i->GetFunc());
+#endif /* RAYLIB_VERSION_GT(5, 5) */
 
 	i = Intrinsic::Create("");
 	i->AddParam("text");
@@ -724,6 +730,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 	};
 	raylibModule.SetValue("TextReplace", i->GetFunc());
 
+#if RAYLIB_VERSION_GT(5, 5)
 	i = Intrinsic::Create("");
 	i->AddParam("text");
 	i->AddParam("begin");
@@ -740,6 +747,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 		return IntrinsicResult(ret);
 	};
 	raylibModule.SetValue("TextReplaceBetween", i->GetFunc());
+#endif /* RAYLIB_VERSION_GT(5, 5) */
 
 	i = Intrinsic::Create("");
 	i->AddParam("text");
@@ -766,7 +774,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 
 		char delimiter = delimiterStr.data()[0];
 		int count = 0;
-		char** parts = TextSplit(textStr.c_str(), delimiter, &count);
+		const char** parts = TextSplit(textStr.c_str(), delimiter, &count);
 
 		ValueList result;
 		for (int i = 0; i < count; i++) {
@@ -792,9 +800,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 			parts[i] = (char*)str.c_str();
 		}
 
-		char* result = TextJoin(parts, count, delimiterStr.c_str());
-		String ret(result);
-		MemFree(result);
+		String ret(TextJoin(parts, count, delimiterStr.c_str()));
 		delete[] parts;
 		return IntrinsicResult(ret);
 	};
@@ -818,9 +824,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 	i->AddParam("text");
 	i->code = INTRINSIC_LAMBDA {
 		String textStr = context->GetVar(String("text")).ToString();
-		char* result = TextToUpper(textStr.c_str());
-		String ret(result);
-		MemFree(result);
+		String ret(TextToUpper(textStr.c_str()));
 		return IntrinsicResult(ret);
 	};
 	raylibModule.SetValue("TextToUpper", i->GetFunc());
@@ -829,9 +833,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 	i->AddParam("text");
 	i->code = INTRINSIC_LAMBDA {
 		String textStr = context->GetVar(String("text")).ToString();
-		char* result = TextToLower(textStr.c_str());
-		String ret(result);
-		MemFree(result);
+		String ret(TextToLower(textStr.c_str()));
 		return IntrinsicResult(ret);
 	};
 	raylibModule.SetValue("TextToLower", i->GetFunc());
@@ -840,9 +842,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 	i->AddParam("text");
 	i->code = INTRINSIC_LAMBDA {
 		String textStr = context->GetVar(String("text")).ToString();
-		char* result = TextToPascal(textStr.c_str());
-		String ret(result);
-		MemFree(result);
+		String ret(TextToPascal(textStr.c_str()));
 		return IntrinsicResult(ret);
 	};
 	raylibModule.SetValue("TextToPascal", i->GetFunc());
@@ -851,9 +851,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 	i->AddParam("text");
 	i->code = INTRINSIC_LAMBDA {
 		String textStr = context->GetVar(String("text")).ToString();
-		char* result = TextToSnake(textStr.c_str());
-		String ret(result);
-		MemFree(result);
+		String ret(TextToSnake(textStr.c_str()));
 		return IntrinsicResult(ret);
 	};
 	raylibModule.SetValue("TextToSnake", i->GetFunc());
@@ -862,9 +860,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 	i->AddParam("text");
 	i->code = INTRINSIC_LAMBDA {
 		String textStr = context->GetVar(String("text")).ToString();
-		char* result = TextToCamel(textStr.c_str());
-		String ret(result);
-		MemFree(result);
+		String ret(TextToCamel(textStr.c_str()));
 		return IntrinsicResult(ret);
 	};
 	raylibModule.SetValue("TextToCamel", i->GetFunc());
@@ -889,6 +885,7 @@ void AddRTextMethods(ValueDict raylibModule) {
 	};
 	raylibModule.SetValue("TextToFloat", i->GetFunc());
 
+#if RAYLIB_VERSION_GT(5, 5)
 	// Text line loading functions
 
 	i = Intrinsic::Create("");
@@ -906,4 +903,5 @@ void AddRTextMethods(ValueDict raylibModule) {
 		return IntrinsicResult(result);
 	};
 	raylibModule.SetValue("LoadTextLines", i->GetFunc());
+#endif /* RAYLIB_VERSION_GT(5, 5) */
 }

@@ -16,11 +16,9 @@
 #include <math.h>
 #include <string.h>
 #include <map>
+#include "macros.h"
 
 using namespace MiniScript;
-
-// Macro to reduce boilerplate for lambda intrinsics
-#define INTRINSIC_LAMBDA [](Context *context, IntrinsicResult partialResult) -> IntrinsicResult
 
 // Helper methods, one per Raylib module (each defined in its own .cpp file)
 void AddRAudioMethods(ValueDict raylibModule);

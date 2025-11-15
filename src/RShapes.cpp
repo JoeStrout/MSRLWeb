@@ -10,10 +10,9 @@
 #include "raylib.h"
 #include "MiniscriptInterpreter.h"
 #include "MiniscriptTypes.h"
+#include "macros.h"
 
 using namespace MiniScript;
-
-#define INTRINSIC_LAMBDA [](Context *context, IntrinsicResult partialResult) -> IntrinsicResult
 
 void AddRShapesMethods(ValueDict raylibModule) {
 	Intrinsic *i;
@@ -699,7 +698,7 @@ void AddRShapesMethods(ValueDict raylibModule) {
 	};
 	raylibModule.SetValue("DrawCircleSectorLines", i->GetFunc());
 
-#if RAYLIB_VERSION_MAJOR>5 || RAYLIB_VERSION_MINOR>5
+#if RAYLIB_VERSION_GT(5, 5)
 	// Additional ellipse drawing
 
 	i = Intrinsic::Create("");
@@ -731,7 +730,7 @@ void AddRShapesMethods(ValueDict raylibModule) {
 		return IntrinsicResult::Null;
 	};
 	raylibModule.SetValue("DrawEllipseLinesV", i->GetFunc());
-#endif /* RAYLIB_VERSION_MAJOR>5 || RAYLIB_VERSION_MINOR>5 */
+#endif /* RAYLIB_VERSION_GT(5, 5) */
 
 	// Additional line drawing
 
@@ -750,6 +749,7 @@ void AddRShapesMethods(ValueDict raylibModule) {
 	};
 	raylibModule.SetValue("DrawLineBezier", i->GetFunc());
 
+#if RAYLIB_VERSION_GT(5, 5)
 	i = Intrinsic::Create("");
 	i->AddParam("startPos");
 	i->AddParam("endPos");
@@ -766,6 +766,7 @@ void AddRShapesMethods(ValueDict raylibModule) {
 		return IntrinsicResult::Null;
 	};
 	raylibModule.SetValue("DrawLineDashed", i->GetFunc());
+#endif /* RAYLIB_VERSION_GT(5, 5) */
 
 	i = Intrinsic::Create("");
 	i->AddParam("points");

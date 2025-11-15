@@ -12,10 +12,9 @@
 #include "MiniscriptInterpreter.h"
 #include "MiniscriptTypes.h"
 #include <emscripten.h>
+#include "macros.h"
 
 using namespace MiniScript;
-
-#define INTRINSIC_LAMBDA [](Context *context, IntrinsicResult partialResult) -> IntrinsicResult
 
 // Helper: Set window title
 EM_JS(void, _SetWindowTitle, (const char *title), {
@@ -754,12 +753,14 @@ void AddRCoreMethods(ValueDict raylibModule) {
 	};
 	raylibModule.SetValue("SetClipboardText", i->GetFunc());
 
+#if RAYLIB_VERSION_GT(5, 5) || !defined(PLATFORM_WEB) // raylib 5.5 doesn't support GetClipboardImage on web
 	i = Intrinsic::Create("");
 	i->code = INTRINSIC_LAMBDA {
 		Image image = GetClipboardImage();
 		return IntrinsicResult(ImageToValue(image));
 	};
 	raylibModule.SetValue("GetClipboardImage", i->GetFunc());
+#endif /* RAYLIB_VERSION_GT(5, 5) || !defined(PLATFORM_WEB) */
 
 	i = Intrinsic::Create("");
 	i->AddParam("fileName");

@@ -2,8 +2,9 @@
 
 # Simple script to run the web server and open the browser
 
-# First, copy the assets so what we're testing matches our source assets
-cp -r assets/ build/assets/
+# First, link the assets so what we're testing matches our source assets
+rm -r build/assets
+ln -s "../assets" build/assets
 
 # Function to cleanup on exit
 cleanup() {

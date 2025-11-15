@@ -158,12 +158,16 @@ y += dy
 
 printCentered = function(s, y, fontSize=20, color)
 	if color == null then color = rl.WHITE
-	size = rl.MeasureTextEx(rl.GetFontDefault, s, fontSize)
+	// DrawText uses a spacing equal to fontSize/10, so measure as:
+	size = rl.MeasureTextEx(rl.GetFontDefault, s, fontSize, fontSize/10)
 	rl.DrawText s, 480 - size.x/2, y, fontSize, color
 end function
 
 // Main loop
 while true
+	rl.BeginDrawing
+	rl.ClearBackground rl.BLACK
+
 	// update stuff
 	updateMouse
 	for btn in buttons
@@ -171,8 +175,6 @@ while true
 	end for	
 	
 	// render stuff
-	rl.BeginDrawing
-	rl.ClearBackground rl.BLACK
 	printCentered "MSRLWeb Demo", 10, 30, [100,100,255,255]
 	printCentered "version " + version.host, 40, 10, [50,50,200,255]
 	for btn in buttons

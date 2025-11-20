@@ -129,7 +129,7 @@ end function
 
 // Create a button for each example
 buttons = []
-x = 480; y = 100
+x = 480; y = 200
 dy = 80
 
 btn = Button.Make("Basic", x, y)
@@ -156,9 +156,18 @@ end function
 buttons.push btn
 y += dy
 
+printCentered = function(s, y, fontSize=20, color)
+	if color == null then color = rl.WHITE
+	// DrawText uses a spacing equal to fontSize/10, so measure as:
+	size = rl.MeasureTextEx(rl.GetFontDefault, s, fontSize, fontSize/10)
+	rl.DrawText s, 480 - size.x/2, y, fontSize, color
+end function
 
 // Main loop
 while true
+	rl.BeginDrawing
+	rl.ClearBackground rl.BLACK
+
 	// update stuff
 	updateMouse
 	for btn in buttons
@@ -166,12 +175,13 @@ while true
 	end for	
 	
 	// render stuff
-	rl.BeginDrawing
-	rl.ClearBackground rl.BLACK	
+	printCentered "MSRLWeb Demo", 10, 30, [100,100,255,255]
+	printCentered "version " + version.host, 40, 10, [50,50,200,255]
 	for btn in buttons
 		btn.render
 	end for
 	rl.DrawFPS
 
 	rl.EndDrawing
+	yield
 end while

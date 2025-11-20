@@ -10,73 +10,73 @@ Generated from: src/R*.cpp module files
 - **rshapes**: 69 functions
 - **rtextures**: 114 functions
 - **rtext**: 51 functions
-- **raudio**: 59 functions
-- **Total**: 381 functions
+- **raudio**: 60 functions
+- **Total**: 382 functions
 
 ## Functions by Module
 
 | rcore | rshapes | rtextures | rtext | raudio |
 |-------|---------|-----------|-------|--------|
 | BeginBlendMode | CheckCollisionCircleLine | BeginTextureMode | CodepointToUTF8 | CloseAudioDevice |
-| BeginDrawing | CheckCollisionCircleRec | ColorAlpha | DrawFPS | GetMasterVolume |
-| BeginMode2D | CheckCollisionCircles | ColorAlphaBlend | DrawText | GetMusicTimeLength |
-| BeginScissorMode | CheckCollisionLines | ColorBrightness | DrawTextCodepoint | GetMusicTimePlayed |
-| ClearBackground | CheckCollisionPointCircle | ColorContrast | DrawTextCodepoints | InitAudioDevice |
-| DisableCursor | CheckCollisionPointLine | ColorFromHSV | DrawTextEx | IsAudioDeviceReady |
-| EnableCursor | CheckCollisionPointPoly | ColorFromNormalized | DrawTextPro | IsAudioStreamPlaying |
-| EncodeDataBase64 | CheckCollisionPointRec | ColorIsEqual | GenImageFontAtlas | IsAudioStreamProcessed |
-| EndBlendMode | CheckCollisionPointTriangle | ColorLerp | GetCodepoint | IsAudioStreamValid |
-| EndDrawing | CheckCollisionRecs | ColorNormalize | GetCodepointCount | IsMusicStreamPlaying |
-| EndMode2D | DrawCircle | ColorTint | GetCodepointNext | IsMusicValid |
-| EndScissorMode | DrawCircleGradient | ColorToHSV | GetCodepointPrevious | IsSoundPlaying |
-| GetCameraMatrix2D | DrawCircleLines | ColorToInt | GetFontDefault | IsSoundValid |
-| GetCharPressed | DrawCircleLinesV | DrawTexture | GetGlyphAtlasRec | IsWaveValid |
-| GetClipboardImage | DrawCircleSector | DrawTextureEx | GetGlyphIndex | LoadAudioStream |
-| GetFPS | DrawCircleSectorLines | DrawTextureNPatch | GetGlyphInfo | LoadMusicStream |
-| GetFrameTime | DrawCircleV | DrawTexturePro | GetTextBetween | LoadMusicStreamFromMemory |
-| GetGamepadAxisCount | DrawEllipse | DrawTextureRec | IsFontValid | LoadSound |
-| GetGamepadAxisMovement | DrawEllipseLines | DrawTextureV | LoadCodepoints | LoadSoundAlias |
-| GetGamepadButtonPressed | DrawEllipseLinesV | EndTextureMode | LoadFont | LoadSoundFromWave |
-| GetGamepadName | DrawEllipseV | Fade | LoadFontData | LoadWave |
-| GetGestureDetected | DrawLine | GenImageCellular | LoadFontEx | LoadWaveFromMemory |
-| GetGestureDragAngle | DrawLineBezier | GenImageChecked | LoadFontFromImage | LoadWaveSamples |
-| GetGestureDragVector | DrawLineDashed | GenImageColor | LoadFontFromMemory | PauseAudioStream |
-| GetGestureHoldDuration | DrawLineEx | GenImageGradientLinear | LoadTextLines | PauseMusicStream |
-| GetGesturePinchAngle | DrawLineStrip | GenImageGradientRadial | LoadUTF8 | PauseSound |
-| GetGesturePinchVector | DrawLineV | GenImageGradientSquare | MeasureText | PlayAudioStream |
-| GetKeyPressed | DrawPixel | GenImagePerlinNoise | MeasureTextEx | PlayMusicStream |
-| GetMouseDelta | DrawPixelV | GenImageText | SetTextLineSpacing | PlaySound |
-| GetMousePosition | DrawPoly | GenImageWhiteNoise | TextAppend | ResumeAudioStream |
-| GetMouseWheelMove | DrawPolyLines | GenTextureMipmaps | TextCopy | ResumeMusicStream |
-| GetMouseWheelMoveV | DrawPolyLinesEx | GetColor | TextFindIndex | ResumeSound |
-| GetMouseX | DrawRectangle | GetImageAlphaBorder | TextFormat | SeekMusicStream |
-| GetMouseY | DrawRectangleGradientEx | GetImageColor | TextInsert | SetAudioStreamBufferSizeDefault |
-| GetRandomValue | DrawRectangleGradientH | GetPixelColor | TextIsEqual | SetAudioStreamPan |
-| GetRenderHeight | DrawRectangleGradientV | GetPixelDataSize | TextJoin | SetAudioStreamPitch |
-| GetRenderWidth | DrawRectangleLines | ImageAlphaClear | TextLength | SetAudioStreamVolume |
-| GetScreenHeight | DrawRectangleLinesEx | ImageAlphaCrop | TextReplace | SetMasterVolume |
-| GetScreenToWorld2D | DrawRectanglePro | ImageAlphaMask | TextReplaceBetween | SetMusicPan |
-| GetScreenWidth | DrawRectangleRec | ImageAlphaPremultiply | TextSplit | SetMusicPitch |
-| GetTime | DrawRectangleRounded | ImageBlurGaussian | TextToCamel | SetMusicVolume |
-| GetTouchPointCount | DrawRectangleRoundedLines | ImageClearBackground | TextToFloat | SetSoundPan |
-| GetTouchPointId | DrawRectangleRoundedLinesEx | ImageColorBrightness | TextToInteger | SetSoundPitch |
-| GetTouchPosition | DrawRectangleV | ImageColorContrast | TextToLower | SetSoundVolume |
-| GetTouchX | DrawRing | ImageColorGrayscale | TextToPascal | StopAudioStream |
-| GetTouchY | DrawRingLines | ImageColorInvert | TextToSnake | StopMusicStream |
-| GetWorldToScreen2D | DrawSplineBasis | ImageColorReplace | TextToUpper | StopSound |
-| HideCursor | DrawSplineBezierCubic | ImageColorTint | UnloadCodepoints | UnloadAudioStream |
-| IsCursorHidden | DrawSplineBezierQuadratic | ImageCopy | UnloadFont | UnloadMusicStream |
-| IsCursorOnScreen | DrawSplineCatmullRom | ImageCrop | UnloadFontData | UnloadSound |
-| IsFileExtension | DrawSplineLinear | ImageDither | UnloadUTF8 | UnloadSoundAlias |
-| IsGamepadAvailable | DrawSplineSegmentBasis | ImageDraw |  | UnloadWave |
-| IsGamepadButtonDown | DrawSplineSegmentBezierCubic | ImageDrawCircle |  | UnloadWaveSamples |
-| IsGamepadButtonPressed | DrawSplineSegmentBezierQuadratic | ImageDrawCircleLines |  | UpdateAudioStream |
-| IsGamepadButtonReleased | DrawSplineSegmentCatmullRom | ImageDrawCircleLinesV |  | UpdateMusicStream |
-| IsGamepadButtonUp | DrawSplineSegmentLinear | ImageDrawCircleV |  | UpdateSound |
-| IsGestureDetected | DrawTriangle | ImageDrawLine |  | WaveCopy |
-| IsKeyDown | DrawTriangleFan | ImageDrawLineEx |  | WaveCrop |
-| IsKeyPressed | DrawTriangleLines | ImageDrawLineV |  | WaveFormat |
-| IsKeyPressedRepeat | DrawTriangleStrip | ImageDrawPixel |  |  |
+| BeginDrawing | CheckCollisionCircleRec | ColorAlpha | DrawFPS | CreateWave |
+| BeginMode2D | CheckCollisionCircles | ColorAlphaBlend | DrawText | GetMasterVolume |
+| BeginScissorMode | CheckCollisionLines | ColorBrightness | DrawTextCodepoint | GetMusicTimeLength |
+| ClearBackground | CheckCollisionPointCircle | ColorContrast | DrawTextCodepoints | GetMusicTimePlayed |
+| DisableCursor | CheckCollisionPointLine | ColorFromHSV | DrawTextEx | InitAudioDevice |
+| EnableCursor | CheckCollisionPointPoly | ColorFromNormalized | DrawTextPro | IsAudioDeviceReady |
+| EncodeDataBase64 | CheckCollisionPointRec | ColorIsEqual | GenImageFontAtlas | IsAudioStreamPlaying |
+| EndBlendMode | CheckCollisionPointTriangle | ColorLerp | GetCodepoint | IsAudioStreamProcessed |
+| EndDrawing | CheckCollisionRecs | ColorNormalize | GetCodepointCount | IsAudioStreamValid |
+| EndMode2D | DrawCircle | ColorTint | GetCodepointNext | IsMusicStreamPlaying |
+| EndScissorMode | DrawCircleGradient | ColorToHSV | GetCodepointPrevious | IsMusicValid |
+| GetCameraMatrix2D | DrawCircleLines | ColorToInt | GetFontDefault | IsSoundPlaying |
+| GetCharPressed | DrawCircleLinesV | DrawTexture | GetGlyphAtlasRec | IsSoundValid |
+| GetClipboardImage | DrawCircleSector | DrawTextureEx | GetGlyphIndex | IsWaveValid |
+| GetFPS | DrawCircleSectorLines | DrawTextureNPatch | GetGlyphInfo | LoadAudioStream |
+| GetFrameTime | DrawCircleV | DrawTexturePro | GetTextBetween | LoadMusicStream |
+| GetGamepadAxisCount | DrawEllipse | DrawTextureRec | IsFontValid | LoadMusicStreamFromMemory |
+| GetGamepadAxisMovement | DrawEllipseLines | DrawTextureV | LoadCodepoints | LoadSound |
+| GetGamepadButtonPressed | DrawEllipseLinesV | EndTextureMode | LoadFont | LoadSoundAlias |
+| GetGamepadName | DrawEllipseV | Fade | LoadFontData | LoadSoundFromWave |
+| GetGestureDetected | DrawLine | GenImageCellular | LoadFontEx | LoadWave |
+| GetGestureDragAngle | DrawLineBezier | GenImageChecked | LoadFontFromImage | LoadWaveFromMemory |
+| GetGestureDragVector | DrawLineDashed | GenImageColor | LoadFontFromMemory | LoadWaveSamples |
+| GetGestureHoldDuration | DrawLineEx | GenImageGradientLinear | LoadTextLines | PauseAudioStream |
+| GetGesturePinchAngle | DrawLineStrip | GenImageGradientRadial | LoadUTF8 | PauseMusicStream |
+| GetGesturePinchVector | DrawLineV | GenImageGradientSquare | MeasureText | PauseSound |
+| GetKeyPressed | DrawPixel | GenImagePerlinNoise | MeasureTextEx | PlayAudioStream |
+| GetMouseDelta | DrawPixelV | GenImageText | SetTextLineSpacing | PlayMusicStream |
+| GetMousePosition | DrawPoly | GenImageWhiteNoise | TextAppend | PlaySound |
+| GetMouseWheelMove | DrawPolyLines | GenTextureMipmaps | TextCopy | ResumeAudioStream |
+| GetMouseWheelMoveV | DrawPolyLinesEx | GetColor | TextFindIndex | ResumeMusicStream |
+| GetMouseX | DrawRectangle | GetImageAlphaBorder | TextFormat | ResumeSound |
+| GetMouseY | DrawRectangleGradientEx | GetImageColor | TextInsert | SeekMusicStream |
+| GetRandomValue | DrawRectangleGradientH | GetPixelColor | TextIsEqual | SetAudioStreamBufferSizeDefault |
+| GetRenderHeight | DrawRectangleGradientV | GetPixelDataSize | TextJoin | SetAudioStreamPan |
+| GetRenderWidth | DrawRectangleLines | ImageAlphaClear | TextLength | SetAudioStreamPitch |
+| GetScreenHeight | DrawRectangleLinesEx | ImageAlphaCrop | TextReplace | SetAudioStreamVolume |
+| GetScreenToWorld2D | DrawRectanglePro | ImageAlphaMask | TextReplaceBetween | SetMasterVolume |
+| GetScreenWidth | DrawRectangleRec | ImageAlphaPremultiply | TextSplit | SetMusicPan |
+| GetTime | DrawRectangleRounded | ImageBlurGaussian | TextToCamel | SetMusicPitch |
+| GetTouchPointCount | DrawRectangleRoundedLines | ImageClearBackground | TextToFloat | SetMusicVolume |
+| GetTouchPointId | DrawRectangleRoundedLinesEx | ImageColorBrightness | TextToInteger | SetSoundPan |
+| GetTouchPosition | DrawRectangleV | ImageColorContrast | TextToLower | SetSoundPitch |
+| GetTouchX | DrawRing | ImageColorGrayscale | TextToPascal | SetSoundVolume |
+| GetTouchY | DrawRingLines | ImageColorInvert | TextToSnake | StopAudioStream |
+| GetWorldToScreen2D | DrawSplineBasis | ImageColorReplace | TextToUpper | StopMusicStream |
+| HideCursor | DrawSplineBezierCubic | ImageColorTint | UnloadCodepoints | StopSound |
+| IsCursorHidden | DrawSplineBezierQuadratic | ImageCopy | UnloadFont | UnloadAudioStream |
+| IsCursorOnScreen | DrawSplineCatmullRom | ImageCrop | UnloadFontData | UnloadMusicStream |
+| IsFileExtension | DrawSplineLinear | ImageDither | UnloadUTF8 | UnloadSound |
+| IsGamepadAvailable | DrawSplineSegmentBasis | ImageDraw |  | UnloadSoundAlias |
+| IsGamepadButtonDown | DrawSplineSegmentBezierCubic | ImageDrawCircle |  | UnloadWave |
+| IsGamepadButtonPressed | DrawSplineSegmentBezierQuadratic | ImageDrawCircleLines |  | UnloadWaveSamples |
+| IsGamepadButtonReleased | DrawSplineSegmentCatmullRom | ImageDrawCircleLinesV |  | UpdateAudioStream |
+| IsGamepadButtonUp | DrawSplineSegmentLinear | ImageDrawCircleV |  | UpdateMusicStream |
+| IsGestureDetected | DrawTriangle | ImageDrawLine |  | UpdateSound |
+| IsKeyDown | DrawTriangleFan | ImageDrawLineEx |  | WaveCopy |
+| IsKeyPressed | DrawTriangleLines | ImageDrawLineV |  | WaveCrop |
+| IsKeyPressedRepeat | DrawTriangleStrip | ImageDrawPixel |  | WaveFormat |
 | IsKeyReleased | GetCollisionRec | ImageDrawPixelV |  |  |
 | IsKeyUp | GetShapesTexture | ImageDrawRectangle |  |  |
 | IsMouseButtonDown | GetShapesTextureRectangle | ImageDrawRectangleLines |  |  |
@@ -134,4 +134,4 @@ Generated from: src/R*.cpp module files
 
 ---
 
-*Generated on Thu Nov 13 19:10:32 MST 2025*
+*Generated on Sat Nov 15 10:49:54 MST 2025*

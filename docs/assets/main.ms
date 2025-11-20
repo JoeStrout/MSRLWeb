@@ -148,6 +148,14 @@ end function
 buttons.push btn
 y += dy
 
+btn = Button.Make("Breakout", x, y)
+btn.action = function
+	import "breakout"
+	breakout.run
+end function
+buttons.push btn
+y += dy
+
 btn = Button.Make("Sounds", x, y)
 btn.action = function
 	import "sounds"
